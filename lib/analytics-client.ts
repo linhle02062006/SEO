@@ -4,7 +4,16 @@ import { useEffect } from "react";
 
 /**
  * Gửi event lên GA4 (nếu có) + ghi nhận nội bộ qua API route.
- * Không gây lỗi khi chưa cấu hình GA_ID.
+ *
+ * Lưu ý quan trọng: event được push THẲNG vào `window.dataLayer` thay vì gọi
+ * `window.gtag(...)`. Lý do:
+ *   - `gtag.js` tải bất đồng bộ, có thể chưa sẵn sàng khi user tương tác
+ *     ngay sau khi vào trang -> nếu gọi `window.gtag` lúc đó sẽ mất event.
+ *   - Push vào `dataLayer` giữ event trong hàng đợi; `gtag.js` sẽ tự xử lý
+ *     toàn bộ hàng đợi ngay khi tải xong.
+ *
+ * Không gây lỗi khi chưa cấu hình GA_ID (mảng `dataLayer` vẫn tồn tại vì
+ * script khởi tạo được render trong `components/analytics/Analytics.tsx`).
  */
 export function trackGaEvent(
   eventName:
@@ -23,8 +32,7 @@ export function trackGaEvent(
   } = {},
 ) {
   if (typeof window === "undefined") return;
-  const gtag = (window as any).gtag;
-  if (!gtag) return;
+
   const eventParams: Record<string, unknown> = {
     ...params,
     currency: params.currency ?? "VND",
@@ -35,7 +43,11 @@ export function trackGaEvent(
       { item_id: String(params.productId), item_name: params.label ?? "" },
     ];
   }
-  gtag("event", eventName, eventParams);
+
+  // Khởi tạo dataLayer nếu chưa có (trường hợp GA_ID chưa cấu hình).
+  const w = window as any;
+  w.dataLayer = w.dataLayer || [];
+  w.dataLayer.push(["event", eventName, eventParams]);
 }
 
 export function trackClientEvent(
