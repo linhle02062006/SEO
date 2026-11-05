@@ -82,6 +82,7 @@ export async function createOrder(
     const inserted = await db
       .insert(customers)
       .values({
+        userId: input.userId ?? null,
         fullName: input.fullName,
         phone: input.phone,
         email: input.email ?? null,
@@ -92,7 +93,14 @@ export async function createOrder(
   } else {
     await db
       .update(customers)
-      .set({ fullName: input.fullName, address: input.address })
+      .set({
+        fullName: input.fullName,
+        address: input.address,
+        // Gắn tài khoản nếu khách đang đăng nhập và record chưa có.
+        ...(input.userId && !customer[0].userId
+          ? { userId: input.userId }
+          : {}),
+      })
       .where(eq(customers.id, customerId!));
   }
 

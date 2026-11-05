@@ -12,6 +12,7 @@ import {
   Loader2,
   ShieldCheck,
   Truck,
+  UserPlus,
 } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { formatPrice } from "@/lib/format";
@@ -25,7 +26,7 @@ type Errors = Record<string, string>;
 export function CheckoutForm({ siteName }: { siteName: string }) {
   const router = useRouter();
   const { items, subtotal, shippingFee, total, clearCart } = useCart();
-  const { error: toastError } = useToast();
+  const { error: toastError, success: toastSuccess } = useToast();
 
   const [form, setForm] = useState({
     fullName: "",
@@ -35,11 +36,39 @@ export function CheckoutForm({ siteName }: { siteName: string }) {
     note: "",
     paymentMethod: "cod" as "cod" | "bank_transfer",
   });
+  const [createAccount, setCreateAccount] = useState(true);
+  const [password, setPassword] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
+
+  // Kiểm tra khách đã đăng nhập chưa (session server-side).
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/account/session")
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data?.authenticated) {
+          setIsLoggedIn(true);
+          setCreateAccount(false);
+          // Tự điền thông tin đã biết.
+          setForm((p) => ({
+            ...p,
+            fullName: p.fullName || data.user?.name || "",
+            email: p.email || data.user?.email || "",
+            phone: p.phone || data.user?.phone || "",
+          }));
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (items.length > 0) {
@@ -69,6 +98,9 @@ export function CheckoutForm({ siteName }: { siteName: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          createAccount: !isLoggedIn && createAccount,
+          password: !isLoggedIn && createAccount ? password : undefined,
+          isLoggedIn,
           items: items.map((i) => ({
             productId: i.id,
             quantity: i.quantity,
@@ -86,6 +118,11 @@ export function CheckoutForm({ siteName }: { siteName: string }) {
       }
 
       clearCart();
+      if (data.accountCreated) {
+        toastSuccess(
+          "Đơn hàng đã được tạo. Vui lòng kiểm tra email để xác nhận tài khoản.",
+        );
+      }
       router.push(`${ROUTES.orderSuccess}/${data.orderCode}`);
     } catch {
       toastError("Không kết nối được máy chủ, vui lòng thử lại.");
@@ -168,6 +205,63 @@ export function CheckoutForm({ siteName }: { siteName: string }) {
                 autoComplete="email"
               />
             </div>
+
+            {/* Tạo tài khoản khách hàng */}
+            {!isLoggedIn && (
+              <div className="sm:col-span-2">
+                <label
+                  htmlFor="createAccount"
+                  className="flex cursor-pointer items-start gap-3 rounded-lg border border-ink-200 bg-ink-50 p-3.5 transition hover:border-brand-300"
+                >
+                  <input
+                    id="createAccount"
+                    type="checkbox"
+                    checked={createAccount}
+                    onChange={(e) => setCreateAccount(e.target.checked)}
+                    className="mt-0.5 size-4 shrink-0 border-ink-300 text-brand-600 focus:ring-brand-500"
+                  />
+                  <span className="min-w-0">
+                    <span className="flex items-center gap-1.5 text-sm font-medium text-ink-900">
+                      <UserPlus className="size-4 text-brand-600" />
+                      Tạo tài khoản để theo dõi đơn hàng
+                    </span>
+                    <span className="mt-0.5 block text-xs leading-5 text-ink-500">
+                      Xem lịch sử đơn hàng, lưu sổ địa chỉ và danh sách yêu
+                      thích. Chúng tôi sẽ gửi email xác nhận để kích hoạt.
+                    </span>
+                  </span>
+                </label>
+
+                {createAccount && (
+                  <div className="mt-3">
+                    <Field
+                      label="Mật khẩu tài khoản *"
+                      name="password"
+                      type="password"
+                      value={password}
+                      onChange={(v) => {
+                        setPassword(v);
+                        setErrors((p) => {
+                          if (!p.password) return p;
+                          const next = { ...p };
+                          delete next.password;
+                          return next;
+                        });
+                      }}
+                      error={errors.password}
+                      placeholder="Tối thiểu 6 ký tự"
+                      autoComplete="new-password"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {isLoggedIn && (
+              <p className="sm:col-span-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-xs text-emerald-800">
+                Bạn đang đăng nhập. Đơn hàng sẽ được lưu vào tài khoản của bạn.
+              </p>
+            )}
             <div className="sm:col-span-2">
               <Field
                 label="Địa chỉ nhận hàng *"

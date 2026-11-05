@@ -58,7 +58,13 @@ export const users = pgTable(
     name: varchar("name", { length: 120 }).notNull(),
     role: roleEnum("role").notNull().default("customer"),
     avatarUrl: text("avatar_url"),
+    phone: varchar("phone", { length: 24 }),
     isActive: boolean("is_active").notNull().default(true),
+    emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
+    emailVerifyToken: text("email_verify_token"),
+    emailVerifyExpiresAt: timestamp("email_verify_expires_at", {
+      withTimezone: true,
+    }),
     lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -70,6 +76,7 @@ export const users = pgTable(
   (t) => [
     uniqueIndex("users_email_unique").on(sql`lower(${t.email})`),
     index("users_role_idx").on(t.role),
+    index("users_verify_token_idx").on(t.emailVerifyToken),
   ],
 );
 
@@ -95,6 +102,9 @@ export const customers = pgTable(
       .notNull()
       .default("0"),
     createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
@@ -614,11 +624,69 @@ export const settings = pgTable(
 );
 
 /* ------------------------------------------------------------------ */
+/* customer_addresses — sổ địa chỉ của tài khoản khách hàng          */
+/* ------------------------------------------------------------------ */
+
+export const customerAddresses = pgTable(
+  "customer_addresses",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    label: varchar("label", { length: 60 }).notNull().default("Mặc định"),
+    fullName: varchar("full_name", { length: 120 }).notNull(),
+    phone: varchar("phone", { length: 24 }).notNull(),
+    address: text("address").notNull(),
+    ward: varchar("ward", { length: 120 }),
+    district: varchar("district", { length: 120 }),
+    city: varchar("city", { length: 120 }),
+    isDefault: boolean("is_default").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("addresses_user_idx").on(t.userId),
+    index("addresses_default_idx").on(t.userId, t.isDefault),
+  ],
+);
+
+/* ------------------------------------------------------------------ */
+/* wishlist_items — sản phẩm yêu thích của tài khoản khách hàng      */
+/* ------------------------------------------------------------------ */
+
+export const wishlistItems = pgTable(
+  "wishlist_items",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    productId: integer("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("wishlist_user_product_unique").on(t.userId, t.productId),
+    index("wishlist_user_idx").on(t.userId),
+  ],
+);
+
+/* ------------------------------------------------------------------ */
 /* relations                                                            */
 /* ------------------------------------------------------------------ */
 
 export const usersRelations = relations(users, ({ many }) => ({
   orders: many(orders),
+  addresses: many(customerAddresses),
+  wishlist: many(wishlistItems),
 }));
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
@@ -685,6 +753,27 @@ export const blogPostsRelations = relations(blogPosts, ({ one }) => ({
   author: one(users, { fields: [blogPosts.authorId], references: [users.id] }),
 }));
 
+export const customerAddressesRelations = relations(
+  customerAddresses,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [customerAddresses.userId],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const wishlistItemsRelations = relations(
+  wishlistItems,
+  ({ one }) => ({
+    user: one(users, { fields: [wishlistItems.userId], references: [users.id] }),
+    product: one(products, {
+      fields: [wishlistItems.productId],
+      references: [products.id],
+    }),
+  }),
+);
+
 /* ------------------------------------------------------------------ */
 /* type exports                                                         */
 /* ------------------------------------------------------------------ */
@@ -699,6 +788,8 @@ export type OrderItem = typeof orderItems.$inferSelect;
 export type Customer = typeof customers.$inferSelect;
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type ContactMessage = typeof contactMessages.$inferSelect;
+export type CustomerAddress = typeof customerAddresses.$inferSelect;
+export type WishlistItem = typeof wishlistItems.$inferSelect;
 export type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
 export type PaymentMethod = (typeof paymentMethodEnum.enumValues)[number];
 export type PaymentStatus = (typeof paymentStatusEnum.enumValues)[number];

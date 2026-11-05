@@ -94,6 +94,19 @@ export default async function OrderSuccessPage({
               </span>
               <CopyButton value={order.orderCode} />
             </div>
+
+            {/* Đơn hàng đã gắn vào tài khoản khách hàng */}
+            {order.userId && (
+              <div className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                Đơn hàng đã được lưu vào tài khoản của bạn.{" "}
+                <Link
+                  href={ROUTES.account}
+                  className="font-semibold underline underline-offset-2"
+                >
+                  Xem tài khoản
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Thông tin đơn hàng */}

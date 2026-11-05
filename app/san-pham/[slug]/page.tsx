@@ -24,6 +24,7 @@ import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductFaq } from "@/components/product/ProductFaq";
 import { ProductSpecTable } from "@/components/product/ProductSpecTable";
 import { ShareButtons } from "@/components/common/ShareButtons";
+import { WishlistButton } from "@/components/account/WishlistButton";
 import { ViewItemTracker } from "@/components/analytics/ViewItemTracker";
 import type { FaqItem, SpecItem } from "@/types";
 
@@ -308,6 +309,7 @@ export default async function ProductDetailPage({
                 title={product.name}
                 url={`${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/san-pham/${product.slug}`}
               />
+              <WishlistButton productId={product.id} />
             </div>
 
             {/* Bảo hành */}

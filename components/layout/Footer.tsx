@@ -110,6 +110,14 @@ export async function Footer() {
                 </Link>
               </li>
             ))}
+            <li>
+              <Link
+                href={ROUTES.account}
+                className="transition hover:text-brand-300"
+              >
+                Tài khoản của tôi
+              </Link>
+            </li>
           </ul>
         </div>
 

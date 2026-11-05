@@ -53,4 +53,8 @@ export const ROUTES = {
   contact: "/lien-he",
   policies: "/chinh-sach",
   admin: "/admin",
+  account: "/tai-khoan",
+  login: "/dang-nhap",
+  register: "/dang-ky",
+  verifyEmail: "/xac-nhan-email",
 } as const;

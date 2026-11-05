@@ -25,6 +25,14 @@ export type ContactEmailPayload = {
   content: string;
 };
 
+/** Thông tin gửi email xác nhận tài khoản khách hàng. */
+export type AccountEmailPayload = {
+  fullName: string;
+  email: string;
+  verifyUrl: string;
+  orderCode?: string | null;
+};
+
 /** Email nhận yêu cầu tư vấn. */
 export function getContactEmail(): string {
   return (
@@ -126,6 +134,72 @@ export async function sendContactEmail(payload: ContactEmailPayload) {
         <hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0" />
         <p style="margin:0 0 8px;color:#64748b;font-size:13px">Nội dung cần tư vấn</p>
         <div style="white-space:pre-wrap;font-size:14px">${escapeHtml(payload.content)}</div>
+      </div>
+    `,
+  });
+}
+
+/**
+ * Gửi email xác nhận tài khoản cho khách hàng vừa đặt hàng (hoặc đăng ký).
+ *
+ * Email được gửi TỚI khách hàng (`to` = email của họ), khác với
+ * `sendContactEmail` gửi tới chủ shop.
+ */
+export async function sendAccountVerificationEmail(
+  payload: AccountEmailPayload,
+) {
+  const from =
+    process.env.MAIL_FROM?.trim() ||
+    `TechZone <${process.env.SMTP_USER?.trim() || "no-reply@localhost"}>`;
+
+  const subject = payload.orderCode
+    ? `[TechZone] Xác nhận tài khoản cho đơn hàng ${payload.orderCode}`
+    : "[TechZone] Xác nhận tài khoản TechZone";
+
+  const orderLine = payload.orderCode
+    ? `<tr><td style="padding:4px 12px 4px 0;color:#64748b">Mã đơn hàng</td><td style="padding:4px 0"><strong>${escapeHtml(payload.orderCode)}</strong></td></tr>`
+    : "";
+
+  await getTransporter().sendMail({
+    from,
+    to: payload.email,
+    subject,
+    text: [
+      `Chào ${payload.fullName},`,
+      "",
+      "Cảm ơn bạn đã đặt hàng tại TechZone. Tài khoản khách hàng của bạn đã được tạo.",
+      "Vui lòng nhấn vào đường dẫn dưới đây để xác nhận email và kích hoạt tài khoản:",
+      "",
+      payload.verifyUrl,
+      "",
+      "Sau khi xác nhận, bạn có thể đăng nhập để xem lịch sử đơn hàng, quản lý sổ địa chỉ và danh sách yêu thích.",
+      "",
+      "Nếu bạn không yêu cầu tạo tài khoản, hãy bỏ qua email này.",
+      "",
+      "Trân trọng,",
+      "TechZone",
+    ].join("\n"),
+    html: `
+      <div style="font-family:system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.6;color:#0f172a">
+        <h2 style="margin:0 0 12px;font-size:18px">Xác nhận tài khoản TechZone</h2>
+        <p style="margin:0 0 12px;font-size:14px">Chào ${escapeHtml(payload.fullName)},</p>
+        <p style="margin:0 0 12px;font-size:14px">
+          Cảm ơn bạn đã đặt hàng tại TechZone. Tài khoản khách hàng của bạn đã được tạo với email
+          <strong>${escapeHtml(payload.email)}</strong>.
+        </p>
+        <table cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:14px">
+          ${orderLine}
+        </table>
+        <p style="margin:16px 0 8px;font-size:14px">Nhấn nút bên dưới để xác nhận email và kích hoạt tài khoản:</p>
+        <p style="margin:0 0 16px">
+          <a href="${escapeHtml(payload.verifyUrl)}" style="display:inline-block;background:#1b63f5;color:#ffffff;text-decoration:none;padding:11px 22px;border-radius:8px;font-weight:600;font-size:14px">Xác nhận tài khoản</a>
+        </p>
+        <p style="margin:0 0 8px;font-size:13px;color:#64748b">Nếu nút không hoạt động, copy đường dẫn sau vào trình duyệt:</p>
+        <p style="margin:0 0 16px;font-size:12px;word-break:break-all;color:#1b63f5">${escapeHtml(payload.verifyUrl)}</p>
+        <p style="margin:0 0 8px;font-size:13px;color:#64748b">
+          Sau khi xác nhận, bạn có thể đăng nhập để xem lịch sử đơn hàng, quản lý sổ địa chỉ và danh sách yêu thích.
+        </p>
+        <p style="margin:0;font-size:13px;color:#64748b">Nếu bạn không yêu cầu tạo tài khoản, hãy bỏ qua email này.</p>
       </div>
     `,
   });

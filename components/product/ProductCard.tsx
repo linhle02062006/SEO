@@ -9,6 +9,7 @@ import { formatPrice, percentOff } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/components/ui/ToastProvider";
+import { WishlistButton } from "@/components/account/WishlistButton";
 import { trackClientEvent } from "@/lib/analytics-client";
 
 export function ProductCard({
@@ -63,10 +64,16 @@ export function ProductCard({
         </span>
       )}
       {product.stock <= 0 && (
-        <span className="absolute right-3 top-3 z-10 rounded-md bg-ink-800/90 px-2 py-0.5 text-xs font-medium text-white">
+        <span className="absolute left-3 top-3 z-10 rounded-md bg-ink-800/90 px-2 py-0.5 text-xs font-medium text-white">
           Hết hàng
         </span>
       )}
+
+      <WishlistButton
+        productId={product.id}
+        size="sm"
+        className="absolute right-3 top-3 z-20 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+      />
 
       <Link
         href={`/san-pham/${product.slug}`}

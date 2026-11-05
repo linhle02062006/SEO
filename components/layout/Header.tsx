@@ -11,14 +11,15 @@ import {
   ChevronDown,
   Mail,
   MessageCircle,
-  User,
   Truck,
   ShieldCheck,
+  UserRound,
 } from "lucide-react";
 import type { Category } from "@/database/schema";
 import { ROUTES, SITE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/hooks/useCart";
+import { AccountMenuButton } from "@/components/account/AccountMenuButton";
 
 const NAV_LINKS = [
   { label: "Trang chủ", href: ROUTES.home },
@@ -223,13 +224,7 @@ export function Header({ categories }: { categories: Category[] }) {
             <Search className="size-5" />
           </button>
 
-          <Link
-            href={ROUTES.admin}
-            className="hidden size-10 place-items-center rounded-lg text-ink-700 transition hover:bg-ink-50 sm:grid"
-            aria-label="Trang quản trị"
-          >
-            <User className="size-5" />
-          </Link>
+          <AccountMenuButton />
 
           <Link
             href={ROUTES.cart}
@@ -310,8 +305,15 @@ export function Header({ categories }: { categories: Category[] }) {
 
             <div className="mt-4 border-t border-ink-100 px-3 pt-4">
               <Link
-                href={ROUTES.contact}
+                href={ROUTES.account}
                 className="flex items-center gap-2 text-sm font-medium text-ink-800 transition hover:text-brand-600"
+              >
+                <UserRound className="size-4 text-brand-600" />
+                Tài khoản của tôi
+              </Link>
+              <Link
+                href={ROUTES.contact}
+                className="mt-3 flex items-center gap-2 text-sm font-medium text-ink-800 transition hover:text-brand-600"
               >
                 <MessageCircle className="size-4 text-brand-600" />
                 Chat tư vấn

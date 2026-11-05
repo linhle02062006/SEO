@@ -2,6 +2,10 @@ import { z } from "zod";
 import { createOrder } from "@/services/order-service";
 import { getProductById } from "@/services/product-service";
 import { trackEvent } from "@/services/seo-service";
+import { ensureCustomerAccount } from "@/services/checkout-account-service";
+import { getSession } from "@/lib/auth";
+import { sendAccountVerificationEmail } from "@/lib/mailer";
+import { getSiteUrl } from "@/lib/site";
 
 export const orderItemSchema = z.object({
   productId: z.number().int().positive(),
@@ -32,21 +36,52 @@ export const checkoutSchema = z.object({
   note: z.string().trim().max(1000, "Ghi chú quá dài").optional(),
   paymentMethod: z.enum(["cod", "bank_transfer"]),
   items: z.array(orderItemSchema).min(1, "Giỏ hàng đang trống"),
+  /**
+   * Tạo tài khoản khách hàng ngay khi đặt hàng.
+   * - `true`  -> cần `password` để tạo tài khoản.
+   * - `false` -> mua hàng không cần tài khoản (khách chưa đăng nhập).
+   */
+  createAccount: z.boolean().optional().default(false),
+  password: z.string().optional(),
+  /** Khách đã đăng nhập -> dùng session thay vì tạo tài khoản mới. */
+  isLoggedIn: z.boolean().optional().default(false),
+}).superRefine((data, ctx) => {
+  // Chỉ yêu cầu mật khẩu khi khách chọn tạo tài khoản và chưa đăng nhập.
+  if (data.createAccount && !data.isLoggedIn) {
+    if (!data.email) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["email"],
+        message: "Vui lòng nhập email để tạo tài khoản.",
+      });
+    }
+    if (!data.password || data.password.length < 6) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["password"],
+        message: "Mật khẩu phải có ít nhất 6 ký tự.",
+      });
+    }
+  }
 });
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
 
 export type CheckoutResult =
-  | { ok: true; orderCode: string; total: number }
+  | {
+      ok: true;
+      orderCode: string;
+      total: number;
+      /** true nếu đơn hàng này vừa tạo tài khoản khách hàng mới. */
+      accountCreated: boolean;
+    }
   | { ok: false; message: string; errors?: Record<string, string> };
 
 /**
  * Tạo đơn hàng từ dữ liệu giỏ hàng do client gửi lên.
  * Giá & tồn kho LUÔN được lấy lại từ database để không bị thao túng.
  */
-export async function submitOrder(
-  raw: unknown,
-): Promise<CheckoutResult> {
+export async function submitOrder(raw: unknown): Promise<CheckoutResult> {
   const parsed = checkoutSchema.safeParse(raw);
   if (!parsed.success) {
     const errors: Record<string, string> = {};
@@ -100,6 +135,31 @@ export async function submitOrder(
 
     const shippingFee = subtotal >= 300000 || subtotal === 0 ? 0 : 30000;
 
+    // Khách đã đăng nhập -> gắn đơn hàng vào tài khoản hiện có.
+    let userId: number | null = null;
+    let accountCreated = false;
+    let verifyToken: string | null = null;
+
+    if (input.isLoggedIn) {
+      const session = await getSession();
+      if (session) userId = session.sub;
+    } else if (input.createAccount && input.email && input.password) {
+      // Tạo tài khoản khách hàng. Lỗi ở bước này KHÔNG được làm hỏng đơn hàng.
+      try {
+        const result = await ensureCustomerAccount({
+          name: input.fullName,
+          email: input.email,
+          password: input.password,
+          phone: input.phone,
+        });
+        userId = result.user?.id ?? null;
+        accountCreated = result.created;
+        verifyToken = result.verifyToken;
+      } catch (err) {
+        console.error("[checkout] Không tạo được tài khoản:", err);
+      }
+    }
+
     const { order, orderCode } = await createOrder({
       fullName: input.fullName,
       phone: input.phone,
@@ -109,7 +169,22 @@ export async function submitOrder(
       paymentMethod: input.paymentMethod,
       items,
       shippingFee,
+      userId,
     });
+
+    // Gửi email xác nhận tài khoản (KHÔNG chặn đơn hàng nếu gửi mail lỗi).
+    if (accountCreated && verifyToken && input.email) {
+      try {
+        await sendAccountVerificationEmail({
+          fullName: input.fullName,
+          email: input.email,
+          verifyUrl: `${getSiteUrl()}/xac-nhan-email?token=${verifyToken}`,
+          orderCode,
+        });
+      } catch (err) {
+        console.error("[checkout] Không gửi được email xác nhận:", err);
+      }
+    }
 
     // Ghi nhận event purchase (đo lường nội bộ)
     await trackEvent({
@@ -119,7 +194,7 @@ export async function submitOrder(
       value: Number(order.total),
     }).catch(() => undefined);
 
-    return { ok: true, orderCode, total: Number(order.total) };
+    return { ok: true, orderCode, total: Number(order.total), accountCreated };
   } catch (err) {
     console.error("[checkout] Lỗi tạo đơn hàng:", err);
     return {

@@ -51,13 +51,22 @@ CREATE TABLE IF NOT EXISTS users (
   name VARCHAR(120) NOT NULL,
   role user_role NOT NULL DEFAULT 'customer',
   avatar_url TEXT,
+  phone VARCHAR(24),
   is_active BOOLEAN NOT NULL DEFAULT true,
+  email_verified_at TIMESTAMPTZ,
+  email_verify_token TEXT,
+  email_verify_expires_at TIMESTAMPTZ,
   last_login_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE UNIQUE INDEX IF NOT EXISTS users_email_unique ON users (lower(email));
 CREATE INDEX IF NOT EXISTS users_role_idx ON users (role);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(24);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified_at TIMESTAMPTZ;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verify_token TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verify_expires_at TIMESTAMPTZ;
+CREATE INDEX IF NOT EXISTS users_verify_token_idx ON users (email_verify_token);
 
 CREATE TABLE IF NOT EXISTS customers (
   id SERIAL PRIMARY KEY,
@@ -76,6 +85,7 @@ CREATE TABLE IF NOT EXISTS customers (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS customers_phone_idx ON customers (phone);
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now();
 
 CREATE TABLE IF NOT EXISTS brands (
   id SERIAL PRIMARY KEY,
@@ -331,4 +341,30 @@ CREATE TABLE IF NOT EXISTS settings (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE UNIQUE INDEX IF NOT EXISTS settings_key_unique ON settings (key);
+
+CREATE TABLE IF NOT EXISTS customer_addresses (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  label VARCHAR(60) NOT NULL DEFAULT 'Mặc định',
+  full_name VARCHAR(120) NOT NULL,
+  phone VARCHAR(24) NOT NULL,
+  address TEXT NOT NULL,
+  ward VARCHAR(120),
+  district VARCHAR(120),
+  city VARCHAR(120),
+  is_default BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS addresses_user_idx ON customer_addresses (user_id);
+CREATE INDEX IF NOT EXISTS addresses_default_idx ON customer_addresses (user_id, is_default);
+
+CREATE TABLE IF NOT EXISTS wishlist_items (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS wishlist_user_product_unique ON wishlist_items (user_id, product_id);
+CREATE INDEX IF NOT EXISTS wishlist_user_idx ON wishlist_items (user_id);
 `;

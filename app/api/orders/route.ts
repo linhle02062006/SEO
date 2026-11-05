@@ -19,6 +19,7 @@ export async function POST(request: Request) {
       ok: true,
       orderCode: result.orderCode,
       total: result.total,
+      accountCreated: result.accountCreated,
     });
   } catch (err) {
     console.error("[api/orders] Lỗi:", err);
