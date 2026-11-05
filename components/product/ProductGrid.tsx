@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ProductWithRelations } from "@/database/schema";
 import { ProductCard } from "./ProductCard";
 
@@ -16,12 +17,12 @@ export function ProductGrid({
         <p className="text-sm text-ink-500">
           Chưa có sản phẩm nào trong danh mục này.
         </p>
-        <a
+        <Link
           href="/san-pham"
           className="mt-3 inline-block text-sm font-medium text-brand-600 hover:underline"
         >
           Xem tất cả sản phẩm
-        </a>
+        </Link>
       </div>
     );
   }

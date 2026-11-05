@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, Phone, MessageCircle } from "lucide-react";
-import { ROUTES, SITE } from "@/lib/site";
+import { ArrowRight, MessageCircle } from "lucide-react";
+import { ROUTES } from "@/lib/site";
 
 export function CtaBanner() {
   return (
@@ -29,29 +29,33 @@ export function CtaBanner() {
                 <ArrowRight className="size-4" />
               </Link>
               <Link
-                href={ROUTES.contact}
+                href={`${ROUTES.contact}?topic=tu-van`}
                 className="inline-flex items-center gap-2 rounded-lg border border-white/40 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
               >
                 <MessageCircle className="size-4" />
-                Liên hệ tư vấn
+                Liên hệ tư vấn →
               </Link>
             </div>
           </div>
 
           <div className="w-full shrink-0 rounded-xl bg-white/10 p-5 backdrop-blur lg:w-72">
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-100">
-              Gọi ngay cho TechZone
+              Chat tư vấn TechZone
             </p>
-            <a
-              href={`tel:${SITE.phone.replace(/\s/g, "")}`}
-              className="mt-2 flex items-center gap-2 text-2xl font-bold text-white"
-            >
-              <Phone className="size-5" />
-              {SITE.phone}
-            </a>
+            <p className="mt-2 text-lg font-bold leading-snug text-white">
+              Gửi yêu cầu tư vấn trực tuyến
+            </p>
             <p className="mt-2 text-xs text-brand-50/80">
-              Tư vấn 8:00 - 22:00, tất cả các ngày trong tuần
+              Tư vấn 8:00 - 22:00, tất cả các ngày trong tuần. Phản hồi qua
+              email trong vòng 24 giờ làm việc.
             </p>
+            <Link
+              href={`${ROUTES.contact}?topic=tu-van`}
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-brand-700 transition hover:bg-brand-50"
+            >
+              <MessageCircle className="size-4" />
+              Mở form tư vấn
+            </Link>
           </div>
         </div>
       </div>

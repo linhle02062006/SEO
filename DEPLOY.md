@@ -98,6 +98,13 @@ vercel env add AUTH_SECRET production
 vercel env add NEXT_PUBLIC_GA_ID production        # optional
 vercel env add NEXT_PUBLIC_GTM_ID production       # optional
 vercel env add NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION production  # optional
+vercel env add CONTACT_EMAIL production
+vercel env add SMTP_HOST production
+vercel env add SMTP_PORT production
+vercel env add SMTP_SECURE production
+vercel env add SMTP_USER production
+vercel env add SMTP_PASS production
+vercel env add MAIL_FROM production
 vercel --prod
 ```
 
@@ -116,11 +123,22 @@ vercel --prod
    | `NEXT_PUBLIC_GA_ID` | `G-XXXXXXX` | Production |
    | `NEXT_PUBLIC_GTM_ID` | `GTM-XXXXXXX` | Production |
    | `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` | mã GSC | Production |
+   | `CONTACT_EMAIL` | `1350080137@sv.hcmunre.edu.vn` | Production |
+   | `SMTP_HOST` | `smtp.gmail.com` | Production |
+   | `SMTP_PORT` | `587` | Production |
+   | `SMTP_SECURE` | `false` | Production |
+   | `SMTP_USER` | email gửi mail | Production |
+   | `SMTP_PASS` | app password | Production |
+   | `MAIL_FROM` | `TechZone <email gửi mail>` | Production |
 
 4. **Deploy**.
 
 > ⚠️ **Bắt buộc**: `DATABASE_URL` phải có sẵn **lúc build** (Vercel build đọc DB để prerender 38 trang sản phẩm + 10 trang blog).
 > Nếu thiếu, build vẫn xong nhưng các trang đó sẽ rỗng.
+>
+> ⚠️ **Form liên hệ**: phải có đủ `SMTP_HOST`/`SMTP_USER`/`SMTP_PASS` thì form mới
+> gửi được email thật. Thiếu biến -> form báo *"Không thể gửi yêu cầu lúc này."*
+> (không báo gửi thành công giả).
 
 ---
 

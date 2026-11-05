@@ -18,6 +18,20 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "name-desc", label: "Tên Z-A" },
 ];
 
+/**
+ * Các option sắp xếp phụ thuộc dữ liệu THẬT:
+ * - `popular` -> cần có đơn hàng (`sold_count > 0`)
+ * - `rating`  -> cần có đánh giá trong `product_reviews`
+ * Nếu shop chưa có dữ liệu -> ẩn option để không đưa ra bảng xếp hạng vô căn cứ.
+ */
+function visibleSortOptions(hasSales: boolean, hasReview: boolean) {
+  return SORT_OPTIONS.filter((o) => {
+    if (o.value === "popular") return hasSales;
+    if (o.value === "rating") return hasReview;
+    return true;
+  });
+}
+
 type FilterState = {
   category?: string;
   brand?: string;
@@ -38,6 +52,7 @@ export function ProductFilters({
   current,
   basePath,
   mobile = false,
+  hasReviews = false,
 }: {
   categories: Category[];
   brands: Brand[];
@@ -47,6 +62,8 @@ export function ProductFilters({
   current: FilterState;
   basePath: string;
   mobile?: boolean;
+  /** Chỉ hiện bộ lọc "Đánh giá từ" khi shop đã có đánh giá THẬT. */
+  hasReviews?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -260,30 +277,32 @@ export function ProductFilters({
             />
             Đang giảm giá
           </label>
-          <div className="pt-1">
-            <p className="mb-1.5 text-xs text-ink-500">Đánh giá từ</p>
-            <div className="flex flex-wrap gap-1.5">
-              {[4, 3, 2].map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() =>
-                    apply({
-                      rating: current.rating === r ? undefined : r,
-                    })
-                  }
-                  className={cn(
-                    "rounded-full border px-2.5 py-1 text-xs transition",
-                    current.rating === r
-                      ? "border-brand-500 bg-brand-50 font-medium text-brand-700"
-                      : "border-ink-200 text-ink-600 hover:border-brand-300",
-                  )}
-                >
-                  {r}★ trở lên
-                </button>
-              ))}
+          {hasReviews && (
+            <div className="pt-1">
+              <p className="mb-1.5 text-xs text-ink-500">Đánh giá từ</p>
+              <div className="flex flex-wrap gap-1.5">
+                {[4, 3, 2].map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() =>
+                      apply({
+                        rating: current.rating === r ? undefined : r,
+                      })
+                    }
+                    className={cn(
+                      "rounded-full border px-2.5 py-1 text-xs transition",
+                      current.rating === r
+                        ? "border-brand-500 bg-brand-50 font-medium text-brand-700"
+                        : "border-ink-200 text-ink-600 hover:border-brand-300",
+                    )}
+                  >
+                    {r}★ trở lên
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </FilterSection>
 
@@ -397,11 +416,20 @@ function FilterSection({
   );
 }
 
-export function SortSelect({ current }: { current?: SortOption }) {
+export function SortSelect({
+  current,
+  hasSales = false,
+  hasReviews = false,
+}: {
+  current?: SortOption;
+  hasSales?: boolean;
+  hasReviews?: boolean;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const options = visibleSortOptions(hasSales, hasReviews);
 
   return (
     <div className="relative">
@@ -420,7 +448,7 @@ export function SortSelect({ current }: { current?: SortOption }) {
         className="h-9 appearance-none rounded-lg border border-ink-200 bg-white pl-3 pr-9 text-sm text-ink-800 outline-none transition hover:border-ink-300 focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
         aria-label="Sắp xếp sản phẩm"
       >
-        {SORT_OPTIONS.map((o) => (
+        {options.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
           </option>

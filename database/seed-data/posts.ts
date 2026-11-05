@@ -343,7 +343,7 @@ export const SEED_POSTS: SeedPost[] = [
     slug: "pd-va-qc-khac-nhau-the-nao",
     excerpt:
       "PD và QC là hai chuẩn sạc nhanh phổ biến nhất. So sánh chi tiết về cơ chế hoạt động, thiết bị hỗ trợ, công suất và cách chọn củ sạc tương thích cả hai.",
-    coverImage: "/blog/pd-va-qc-khac-nhau.jpg",
+    coverImage: "/blog/pd-va-qc-khac-nhau-the-nao.jpg",
     coverAlt: "So sánh chuẩn sạc nhanh PD và QC",
     category: "so-sanh",
     tags: ["PD", "QC", "sạc nhanh", "củ sạc"],

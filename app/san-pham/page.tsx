@@ -4,7 +4,11 @@ import { SlidersHorizontal, ChevronRight } from "lucide-react";
 import { ROUTES } from "@/lib/site";
 import { buildMetadata } from "@/lib/seo";
 import { breadcrumbListSchema } from "@/lib/schema";
-import { getProducts } from "@/services/product-service";
+import {
+  getProducts,
+  hasSalesData,
+  hasReviewsData,
+} from "@/services/product-service";
 import {
   getAllBrands,
   getAllCategories,
@@ -61,27 +65,37 @@ export default async function ProductsPage({
   const onSale = first(sp["khuyen-mai"]) === "true";
   const rating = first(sp["danh-gia"]) ? Number(first(sp["danh-gia"])) : undefined;
 
-  const [result, categories, brands, categoryCounts, brandCounts, priceRange] =
-    await Promise.all([
-      getProducts({
-        q,
-        category,
-        brand,
-        minPrice: Number.isFinite(minPrice) ? minPrice : undefined,
-        maxPrice: Number.isFinite(maxPrice) ? maxPrice : undefined,
-        sort,
-        page,
-        limit: 12,
-        inStock,
-        onSale,
-        rating,
-      }),
-      getAllCategories(),
-      getAllBrands(),
-      getCategoryCounts(),
-      getBrandCounts(),
-      getPriceRange(),
-    ]);
+  const [
+    result,
+    categories,
+    brands,
+    categoryCounts,
+    brandCounts,
+    priceRange,
+    hasSales,
+    hasReviews,
+  ] = await Promise.all([
+    getProducts({
+      q,
+      category,
+      brand,
+      minPrice: Number.isFinite(minPrice) ? minPrice : undefined,
+      maxPrice: Number.isFinite(maxPrice) ? maxPrice : undefined,
+      sort,
+      page,
+      limit: 12,
+      inStock,
+      onSale,
+      rating,
+    }),
+    getAllCategories(),
+    getAllBrands(),
+    getCategoryCounts(),
+    getBrandCounts(),
+    getPriceRange(),
+    hasSalesData(),
+    hasReviewsData(),
+  ]);
 
   const crumb = breadcrumbListSchema([
     { name: "Trang chủ", href: "/" },
@@ -174,6 +188,7 @@ export default async function ProductsPage({
             categoryCounts={categoryCounts}
             brandCounts={brandCounts}
             priceRange={priceRange}
+            hasReviews={hasReviews}
             current={{
               category,
               brand,
@@ -194,7 +209,7 @@ export default async function ProductsPage({
               <p className="text-sm text-ink-600">
                 Hiển thị {result.items.length} / {result.total} sản phẩm
               </p>
-              <SortSelect current={sort} />
+              <SortSelect current={sort} hasSales={hasSales} hasReviews={hasReviews} />
             </div>
 
             {/* Bộ lọc mobile */}
@@ -206,6 +221,7 @@ export default async function ProductsPage({
                 categoryCounts={categoryCounts}
                 brandCounts={brandCounts}
                 priceRange={priceRange}
+                hasReviews={hasReviews}
                 current={{
                   category,
                   brand,

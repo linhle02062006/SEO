@@ -66,19 +66,14 @@ export default async function RootLayout({
       logo: `${getSiteUrl()}/logo.svg`,
       description: SITE.description,
       email: SITE.email,
-      telephone: SITE.phone,
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: SITE.address.street,
-        addressLocality: SITE.address.city,
-        addressRegion: SITE.address.district,
-        addressCountry: "VN",
-      },
-      sameAs: [
-        SITE.social.facebook,
-        SITE.social.instagram,
-        SITE.social.youtube,
-        SITE.social.tiktok,
+      contactPoint: [
+        {
+          "@type": "ContactPoint",
+          email: SITE.email,
+          contactType: "customer service",
+          areaServed: "VN",
+          availableLanguage: ["vi"],
+        },
       ],
     },
   ];

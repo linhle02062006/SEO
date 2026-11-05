@@ -117,7 +117,7 @@ export default async function SearchPage({
                 Không tìm thấy sản phẩm phù hợp
               </h2>
               <p className="mx-auto mt-2 max-w-md text-sm text-ink-600">
-                Không có sản phẩm nào khớp với từ khóa "{q}". Hãy thử từ khóa
+                Không có sản phẩm nào khớp với từ khóa &quot;{q}&quot;. Hãy thử từ khóa
                 khác hoặc khám phá danh mục sản phẩm của TechZone.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">

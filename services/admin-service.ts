@@ -322,12 +322,11 @@ export async function getAdminCategories() {
   const rows = await db
     .select({
       category: categories,
-      productCount: sql<number>`(
-        SELECT count(*) FROM ${products}
-        WHERE ${products.categoryId} = ${categories.id}
-      )`,
+      productCount: sql<number>`count(${products.id})`,
     })
     .from(categories)
+    .leftJoin(products, eq(products.categoryId, categories.id))
+    .groupBy(categories.id)
     .orderBy(asc(categories.position), asc(categories.name));
   return rows.map((r) => ({
     ...r.category,
@@ -397,12 +396,11 @@ export async function getAdminBrands() {
   const rows = await db
     .select({
       brand: brands,
-      productCount: sql<number>`(
-        SELECT count(*) FROM ${products}
-        WHERE ${products.brandId} = ${brands.id}
-      )`,
+      productCount: sql<number>`count(${products.id})`,
     })
     .from(brands)
+    .leftJoin(products, eq(products.brandId, brands.id))
+    .groupBy(brands.id)
     .orderBy(asc(brands.name));
   return rows.map((r) => ({
     ...r.brand,

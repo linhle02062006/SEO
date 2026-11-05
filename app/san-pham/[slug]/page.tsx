@@ -204,6 +204,11 @@ export default async function ProductDetailPage({
             </h1>
 
             <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
+              {/*
+                Chỉ hiển thị rating / số lượt bán khi có dữ liệu THẬT
+                (đánh giá trong `product_reviews` hoặc đơn hàng đã đặt).
+                Không có dữ liệu -> ẩn hoàn toàn, không điền số giả.
+              */}
               {product.ratingCount > 0 && (
                 <span className="flex items-center gap-1.5">
                   <span className="flex">
@@ -226,10 +231,15 @@ export default async function ProductDetailPage({
                   </span>
                 </span>
               )}
-              <span className="flex items-center gap-1.5 text-ink-500">
-                <Package className="size-4" />
-                Đã bán {product.soldCount}
-              </span>
+              {product.soldCount > 0 && (
+                <span className="flex items-center gap-1.5 text-ink-500">
+                  <Package className="size-4" />
+                  Đã bán {product.soldCount}
+                </span>
+              )}
+              {product.ratingCount === 0 && product.soldCount === 0 && (
+                <span className="text-ink-500">Chưa có đánh giá</span>
+              )}
               <span className="text-ink-500">SKU: {product.sku}</span>
             </div>
 

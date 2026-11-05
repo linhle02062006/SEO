@@ -9,12 +9,12 @@ import { FaqSection } from "@/components/common/FaqSection";
 export const metadata: Metadata = buildMetadata({
   title: "Liên hệ — Tư vấn phụ kiện điện thoại",
   description:
-    "Liên hệ TechZone để được tư vấn chọn phụ kiện điện thoại, tra cứu đơn hàng hoặc hợp tác phân phối. Hotline 1900 6868, email contact@techzone.vn.",
+    "Liên hệ TechZone để được tư vấn chọn phụ kiện điện thoại, tra cứu đơn hàng hoặc hợp tác phân phối. Gửi yêu cầu tư vấn trực tuyến, phản hồi trong 24 giờ làm việc.",
   path: "/lien-he",
   keywords: [
     "liên hệ techzone",
     "tư vấn phụ kiện điện thoại",
-    "hotline techzone",
+    "chat tư vấn techzone",
   ],
 });
 
@@ -58,25 +58,11 @@ export default function ContactPage() {
               </h2>
               <dl className="mt-4 space-y-4 text-sm">
                 <div>
-                  <dt className="text-xs text-ink-500">Hotline</dt>
-                  <dd className="mt-0.5">
-                    <a
-                      href={`tel:${SITE.phone.replace(/\s/g, "")}`}
-                      className="text-lg font-bold text-brand-600 hover:underline"
-                    >
-                      {SITE.phone}
-                    </a>
-                    <p className="mt-0.5 text-xs text-ink-500">
-                      8:00 - 22:00, tất cả các ngày trong tuần
-                    </p>
-                  </dd>
-                </div>
-                <div>
                   <dt className="text-xs text-ink-500">Email</dt>
                   <dd className="mt-0.5">
                     <a
                       href={`mailto:${SITE.email}`}
-                      className="font-medium text-ink-900 hover:text-brand-600"
+                      className="break-all font-medium text-ink-900 hover:text-brand-600"
                     >
                       {SITE.email}
                     </a>
@@ -86,15 +72,13 @@ export default function ContactPage() {
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-ink-500">Địa chỉ showroom</dt>
+                  <dt className="text-xs text-ink-500">Hình thức tư vấn</dt>
                   <dd className="mt-0.5 leading-6 text-ink-800">
-                    {SITE.address.street}, {SITE.address.ward},{" "}
-                    {SITE.address.district}, {SITE.address.city},{" "}
-                    {SITE.address.country}
+                    Chat tư vấn trực tuyến qua form liên hệ trên trang này.
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-ink-500">Giờ mở cửa</dt>
+                  <dt className="text-xs text-ink-500">Giờ tư vấn</dt>
                   <dd className="mt-0.5 text-ink-800">
                     Thứ 2 - Thứ 7: 8:00 - 21:00
                     <br />
@@ -128,7 +112,7 @@ export default function ContactPage() {
             {
               question: "Làm sao tra cứu đơn hàng của tôi?",
               answer:
-                "Sau khi đặt hàng bạn sẽ nhận được mã đơn hàng dạng TZ250105A1B2C3. Bạn có thể gọi hotline 1900 6868 hoặc gửi email kèm mã đơn để chúng tôi tra cứu nhanh nhất.",
+                "Sau khi đặt hàng bạn sẽ nhận được mã đơn hàng dạng TZ250105A1B2C3. Bạn có thể gửi email kèm mã đơn hàng để chúng tôi tra cứu nhanh nhất.",
             },
             {
               question: "Thời gian giao hàng mất bao lâu?",
@@ -138,7 +122,7 @@ export default function ContactPage() {
             {
               question: "Sản phẩm có được bảo hành không?",
               answer:
-                "Tất cả sản phẩm tại TechZone được bảo hành chính hãnh 12 tháng. Sản phẩm lỗi trong thời gian bảo hành sẽ được đổi mới hoặc hoàn tiền.",
+                "Tất cả sản phẩm tại TechZone được bảo hành chính hãng 12 tháng. Sản phẩm lỗi trong thời gian bảo hành sẽ được đổi mới hoặc hoàn tiền.",
             },
             {
               question: "Tôi có thể đổi trả sản phẩm không?",

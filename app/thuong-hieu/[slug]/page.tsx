@@ -4,7 +4,11 @@ import { SITE } from "@/lib/site";
 import { buildMetadata } from "@/lib/seo";
 import { breadcrumbListSchema } from "@/lib/schema";
 import { getAllBrands, getBrandBySlug, getBrandCounts } from "@/services/catalog-service";
-import { getProducts } from "@/services/product-service";
+import {
+  getProducts,
+  hasSalesData,
+  hasReviewsData,
+} from "@/services/product-service";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { ProductFilters } from "@/components/product/ProductFilters";
@@ -75,23 +79,33 @@ export default async function BrandPage({
   const sort = first(sp["sap-xep"]) ?? "newest";
   const page = first(sp.trang) ? Math.max(1, Number(first(sp.trang))) : 1;
 
-  const [result, categories, categoryCounts, brands, brandCounts, priceRange] =
-    await Promise.all([
-      getProducts({
-        brand: slug,
-        category,
-        minPrice: Number.isFinite(minPrice) ? minPrice : undefined,
-        maxPrice: Number.isFinite(maxPrice) ? maxPrice : undefined,
-        sort: sort as never,
-        page,
-        limit: 12,
-      }),
-      import("@/services/catalog-service").then((m) => m.getAllCategories()),
-      import("@/services/catalog-service").then((m) => m.getCategoryCounts()),
-      getAllBrands(),
-      getBrandCounts(),
-      import("@/services/catalog-service").then((m) => m.getPriceRange()),
-    ]);
+  const [
+    result,
+    categories,
+    categoryCounts,
+    brands,
+    brandCounts,
+    priceRange,
+    hasSales,
+    hasReviews,
+  ] = await Promise.all([
+    getProducts({
+      brand: slug,
+      category,
+      minPrice: Number.isFinite(minPrice) ? minPrice : undefined,
+      maxPrice: Number.isFinite(maxPrice) ? maxPrice : undefined,
+      sort: sort as never,
+      page,
+      limit: 12,
+    }),
+    import("@/services/catalog-service").then((m) => m.getAllCategories()),
+    import("@/services/catalog-service").then((m) => m.getCategoryCounts()),
+    getAllBrands(),
+    getBrandCounts(),
+    import("@/services/catalog-service").then((m) => m.getPriceRange()),
+    hasSalesData(),
+    hasReviewsData(),
+  ]);
 
   const crumbs = [
     { name: "Trang chủ", href: "/" },
@@ -141,6 +155,7 @@ export default async function BrandPage({
             categoryCounts={categoryCounts}
             brandCounts={brandCounts}
             priceRange={priceRange}
+            hasReviews={hasReviews}
             current={{ brand: slug, category, minPrice, maxPrice, sort: sort as never }}
             basePath={`/thuong-hieu/${slug}`}
           />
@@ -150,7 +165,11 @@ export default async function BrandPage({
               <p className="text-sm text-ink-600">
                 Hiển thị {result.items.length} / {result.total} sản phẩm
               </p>
-              <SortSelect current={sort as never} />
+              <SortSelect
+                current={sort as never}
+                hasSales={hasSales}
+                hasReviews={hasReviews}
+              />
             </div>
 
             <div className="mt-4 sm:hidden">
@@ -161,6 +180,7 @@ export default async function BrandPage({
                 categoryCounts={categoryCounts}
                 brandCounts={brandCounts}
                 priceRange={priceRange}
+                hasReviews={hasReviews}
                 current={{ brand: slug, category, minPrice, maxPrice, sort: sort as never }}
                 basePath={`/thuong-hieu/${slug}`}
               />

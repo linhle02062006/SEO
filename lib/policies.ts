@@ -65,7 +65,7 @@ export const POLICIES: Policy[] = [
           "Bạn không cần trực tiếp đến trung tâm bảo hành. TechZone sẽ tiếp nhận và xử lý trực tiếp, giúp bạn tiết kiệm thời gian.",
         ],
         list: [
-          "Bước 1: Gửi mã đơn hàng và ảnh/video lỗi qua hotline 1900 6868 hoặc email contact@techzone.vn",
+          "Bước 1: Gửi mã đơn hàng và ảnh/video lỗi qua form liên hệ hoặc email 1350080137@sv.hcmunre.edu.vn",
           "Bước 2: Nhân viên kỹ thuật phản hồi trong 24 giờ làm việc với kết quả kiểm tra",
           "Bước 3: Gửi sản phẩm lỗi về TechZone (chúng tôi hỗ trợ chi phí vận chuyển chiều về)",
           "Bước 4: Đổi mới sản phẩm hoặc hoàn tiền trong 5-7 ngày làm việc",
@@ -81,7 +81,7 @@ export const POLICIES: Policy[] = [
       {
         question: "Tôi có thể bảo hành tại địa điểm gần nhà hơn không?",
         answer:
-          "Bạn có thể đến showroom TechZone tại 123 Nguyễn Huệ, Quận 1, TP.HCM để được hỗ trợ trực tiếp và nhận sản phẩm thay thế nhanh hơn.",
+          "Bạn có thể gửi yêu cầu bảo hành kèm mã đơn hàng và hình ảnh lỗi qua form liên hệ — đội ngũ TechZone sẽ hỗ trợ trực tiếp và đồng hành xử lý ngay.",
       },
       {
         question: "Cần những gì để gửi bảo hành?",
@@ -116,7 +116,7 @@ export const POLICIES: Policy[] = [
         heading: "Quy trình đổi trả",
         body: ["Quy trình gồm 4 bước đơn giản:"],
         list: [
-          "Bước 1: Gửi yêu cầu qua hotline 1900 6868 hoặc email contact@techzone.vn kèm mã đơn hàng",
+          "Bước 1: Gửi yêu cầu qua form liên hệ hoặc email 1350080137@sv.hcmunre.edu.vn kèm mã đơn hàng",
           "Bước 2: Nhân viên xác nhận đơn hàng có đủ điều kiện đổi trả trong 24 giờ",
           "Bước 3: Gửi sản phẩm về TechZone (miễn phí vận chuyển chiều về)",
           "Bước 4: Nhận lại sản phẩm mới hoặc hoàn tiền trong 3-5 ngày làm việc",
@@ -204,7 +204,7 @@ export const POLICIES: Policy[] = [
       {
         question: "Đơn hàng của tôi đang ở đâu?",
         answer:
-          "Bạn tra cứu bằng mã đơn hàng dạng TZ250105A1B2C3 tại trang xác nhận đơn hàng, hoặc gọi 1900 6868 để được hỗ trợ tra cứu.",
+          "Bạn tra cứu bằng mã đơn hàng dạng TZ250105A1B2C3 tại trang xác nhận đơn hàng, hoặc gửi email kèm mã đơn để được hỗ trợ tra cứu.",
       },
       {
         question: "Có giao hàng ngoài giờ làm việc không?",
@@ -214,7 +214,7 @@ export const POLICIES: Policy[] = [
       {
         question: "Tôi có thể thay đổi địa chỉ giao hàng không?",
         answer:
-          "Có, nếu đơn chưa chuyển sang trạng thái đang giao. Vui lòng liên hệ hotline trong vòng 2 giờ sau khi đặt hàng.",
+          "Có, nếu đơn chưa chuyển sang trạng thái đang giao. Vui lòng gửi yêu cầu qua form liên hệ trong vòng 2 giờ sau khi đặt hàng.",
       },
     ],
   },
@@ -259,7 +259,7 @@ export const POLICIES: Policy[] = [
       {
         heading: "Quyền của bạn",
         body: [
-          "Bạn có quyền yêu cầu xem, chỉnh sửa hoặc xóa dữ liệu cá nhân, cũng như rút lại sự đồng ý xử lý dữ liệu bất cứ lúc nào. Liên hệ contact@techzone.vn để thực hiện quyền này.",
+          "Bạn có quyền yêu cầu xem, chỉnh sửa hoặc xóa dữ liệu cá nhân, cũng như rút lại sự đồng ý xử lý dữ liệu bất cứ lúc nào. Liên hệ 1350080137@sv.hcmunre.edu.vn để thực hiện quyền này.",
         ],
       },
       {
@@ -278,7 +278,7 @@ export const POLICIES: Policy[] = [
       {
         question: "Tôi có thể yêu cầu xóa dữ liệu không?",
         answer:
-          "Có. Gửi yêu cầu qua contact@techzone.vn kèm email hoặc số điện thoại đã đăng ký, chúng tôi xử lý trong tối đa 5 ngày làm việc.",
+          "Có. Gửi yêu cầu qua 1350080137@sv.hcmunre.edu.vn kèm email hoặc số điện thoại đã đăng ký, chúng tôi xử lý trong tối đa 5 ngày làm việc.",
       },
     ],
   },
@@ -336,7 +336,7 @@ export const POLICIES: Policy[] = [
       {
         question: "Tôi có thể đặt hàng bằng tài khoản doanh nghiệp không?",
         answer:
-          "Hiện tại website hỗ trợ đặt hàng cá nhân. Với nhu cầu số lượng lớn, vui lòng liên hệ contact@techzone.vn để được hỗ trợ báo giá sỉ.",
+          "Hiện tại website hỗ trợ đặt hàng cá nhân. Với nhu cầu số lượng lớn, vui lòng liên hệ 1350080137@sv.hcmunre.edu.vn để được hỗ trợ báo giá sỉ.",
       },
     ],
   },

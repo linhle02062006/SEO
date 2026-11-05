@@ -9,7 +9,11 @@ import {
   getCategoryBySlugWithCount,
   getCategoryCounts,
 } from "@/services/catalog-service";
-import { getProducts } from "@/services/product-service";
+import {
+  getProducts,
+  hasSalesData,
+  hasReviewsData,
+} from "@/services/product-service";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { ProductFilters } from "@/components/product/ProductFilters";
@@ -87,26 +91,36 @@ export default async function CategoryPage({
   const onSale = first(sp["khuyen-mai"]) === "true";
   const rating = first(sp["danh-gia"]) ? Number(first(sp["danh-gia"])) : undefined;
 
-  const [result, categories, categoryCounts, brands, brandCounts, priceRange] =
-    await Promise.all([
-      getProducts({
-        category: slug,
-        brand,
-        minPrice: Number.isFinite(minPrice) ? minPrice : undefined,
-        maxPrice: Number.isFinite(maxPrice) ? maxPrice : undefined,
-        sort: sort as never,
-        page,
-        limit: 12,
-        inStock,
-        onSale,
-        rating,
-      }),
-      getAllCategories(),
-      getCategoryCounts(),
-      import("@/services/catalog-service").then((m) => m.getAllBrands()),
-      import("@/services/catalog-service").then((m) => m.getBrandCounts()),
-      import("@/services/catalog-service").then((m) => m.getPriceRange()),
-    ]);
+  const [
+    result,
+    categories,
+    categoryCounts,
+    brands,
+    brandCounts,
+    priceRange,
+    hasSales,
+    hasReviews,
+  ] = await Promise.all([
+    getProducts({
+      category: slug,
+      brand,
+      minPrice: Number.isFinite(minPrice) ? minPrice : undefined,
+      maxPrice: Number.isFinite(maxPrice) ? maxPrice : undefined,
+      sort: sort as never,
+      page,
+      limit: 12,
+      inStock,
+      onSale,
+      rating,
+    }),
+    getAllCategories(),
+    getCategoryCounts(),
+    import("@/services/catalog-service").then((m) => m.getAllBrands()),
+    import("@/services/catalog-service").then((m) => m.getBrandCounts()),
+    import("@/services/catalog-service").then((m) => m.getPriceRange()),
+    hasSalesData(),
+    hasReviewsData(),
+  ]);
 
   const crumbs = [
     { name: "Trang chủ", href: "/" },
@@ -154,6 +168,7 @@ export default async function CategoryPage({
             categoryCounts={categoryCounts}
             brandCounts={brandCounts}
             priceRange={priceRange}
+            hasReviews={hasReviews}
             current={{
               category: slug,
               brand,
@@ -172,7 +187,11 @@ export default async function CategoryPage({
               <p className="text-sm text-ink-600">
                 Hiển thị {result.items.length} / {result.total} sản phẩm
               </p>
-              <SortSelect current={sort as never} />
+              <SortSelect
+                current={sort as never}
+                hasSales={hasSales}
+                hasReviews={hasReviews}
+              />
             </div>
 
             <div className="mt-4 sm:hidden">
@@ -183,6 +202,7 @@ export default async function CategoryPage({
                 categoryCounts={categoryCounts}
                 brandCounts={brandCounts}
                 priceRange={priceRange}
+                hasReviews={hasReviews}
                 current={{
                   category: slug,
                   brand,

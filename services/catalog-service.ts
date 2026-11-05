@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, ilike, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, or, sql } from "drizzle-orm";
 import { getDb } from "@/database/db";
 import {
   blogPosts,
@@ -10,6 +10,7 @@ import {
   type Category,
 } from "@/database/schema";
 import { slugify } from "@/lib/slug";
+import { foldSql, tokenizeQuery } from "@/lib/vi-search";
 
 /* ------------------------------------------------------------------ */
 /* Categories                                                           */
@@ -51,14 +52,15 @@ export async function getCategoryBySlugWithCount(
   const rows = await db
     .select({
       category: categories,
-      productCount: sql<number>`(
-        SELECT count(*) FROM ${products}
-        WHERE ${products.categoryId} = ${categories.id}
-          AND ${products.status} = 'active'
-      )`,
+      productCount: sql<number>`count(${products.id})`,
     })
     .from(categories)
+    .leftJoin(
+      products,
+      and(eq(products.categoryId, categories.id), eq(products.status, "active")),
+    )
     .where(eq(categories.slug, slug))
+    .groupBy(categories.id)
     .limit(1);
   if (!rows.length) return null;
   return { ...rows[0].category, productCount: Number(rows[0].productCount) };
@@ -71,13 +73,14 @@ export async function getCategoryCounts(): Promise<
   const rows = await db
     .select({
       slug: categories.slug,
-      productCount: sql<number>`(
-        SELECT count(*) FROM ${products}
-        WHERE ${products.categoryId} = ${categories.id}
-          AND ${products.status} = 'active'
-      )`,
+      productCount: sql<number>`count(${products.id})`,
     })
-    .from(categories);
+    .from(categories)
+    .leftJoin(
+      products,
+      and(eq(products.categoryId, categories.id), eq(products.status, "active")),
+    )
+    .groupBy(categories.id);
   const out: Record<string, number> = {};
   for (const r of rows) out[r.slug] = Number(r.productCount);
   return out;
@@ -107,13 +110,14 @@ export async function getBrandCounts(): Promise<Record<string, number>> {
   const rows = await db
     .select({
       slug: brands.slug,
-      productCount: sql<number>`(
-        SELECT count(*) FROM ${products}
-        WHERE ${products.brandId} = ${brands.id}
-          AND ${products.status} = 'active'
-      )`,
+      productCount: sql<number>`count(${products.id})`,
     })
-    .from(brands);
+    .from(brands)
+    .leftJoin(
+      products,
+      and(eq(products.brandId, brands.id), eq(products.status, "active")),
+    )
+    .groupBy(brands.id);
   const out: Record<string, number> = {};
   for (const r of rows) out[r.slug] = Number(r.productCount);
   return out;
@@ -206,7 +210,20 @@ export async function getPriceRange(): Promise<{
 
 export async function searchSuggestions(q: string, limit = 6) {
   const db = await getDb();
-  const pattern = `%${q.trim()}%`;
+  const tokens = tokenizeQuery(q);
+  if (!tokens.length) return [];
+
+  const conditions = [eq(products.status, "active")];
+  for (const token of tokens) {
+    const pattern = `%${token.replace(/[\\%_]/g, (m) => `\\${m}`)}%`;
+    conditions.push(
+      or(
+        sql`${foldSql(products.name)} LIKE ${pattern} ESCAPE '\'`,
+        sql`${foldSql(products.sku)} LIKE ${pattern} ESCAPE '\'`,
+      )!,
+    );
+  }
+
   return db
     .select({
       id: products.id,
@@ -217,7 +234,7 @@ export async function searchSuggestions(q: string, limit = 6) {
       salePrice: products.salePrice,
     })
     .from(products)
-    .where(and(eq(products.status, "active"), ilike(products.name, pattern)))
+    .where(and(...conditions))
     .orderBy(desc(products.soldCount))
     .limit(limit);
 }

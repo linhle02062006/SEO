@@ -96,7 +96,7 @@ export function SocialProfilesManager({
             id="social-url"
             name="url"
             required
-            placeholder="https://facebook.com/techzone.vn"
+            placeholder="https://facebook.com/ten-tai-khoan-that"
             className={inputCls}
           />
           {state.errors?.url && (
@@ -114,7 +114,7 @@ export function SocialProfilesManager({
           <input
             id="social-handle"
             name="handle"
-            placeholder="techzone.vn"
+            placeholder="ten-tai-khoan-that"
             className={inputCls}
           />
         </div>

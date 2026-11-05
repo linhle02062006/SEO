@@ -27,12 +27,10 @@ const GROUPS: {
   {
     title: "Thông tin liên hệ (NAP)",
     description:
-      "NAP phải nhất quán giữa website, Google Business Profile và hồ sơ mạng xã hội.",
+      "Chỉ khai báo thông tin liên hệ THẬT. Website không hiển thị số điện thoại hay địa chỉ nếu chưa có dữ liệu thực tế.",
     fields: [
       { key: "contact_email", label: "Email hỗ trợ" },
-      { key: "contact_phone", label: "Hotline" },
-      { key: "contact_address", label: "Địa chỉ showroom", type: "textarea" },
-      { key: "contact_hours", label: "Giờ mở cửa" },
+      { key: "contact_hours", label: "Giờ tư vấn" },
     ],
   },
   {

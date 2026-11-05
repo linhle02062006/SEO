@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getDb } from "@/database/db";
 import { contactMessages } from "@/database/schema";
+import { sendContactEmail } from "@/lib/mailer";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,10 @@ const schema = z.object({
   website: z.string().max(0).optional(),
 });
 
+const SUCCESS_MESSAGE = "Cảm ơn bạn! Yêu cầu tư vấn đã được gửi thành công.";
+const FAILURE_MESSAGE =
+  "Không thể gửi yêu cầu lúc này. Vui lòng thử lại sau.";
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -38,29 +43,62 @@ export async function POST(request: Request) {
       );
     }
 
-    // Honeypot bị kích hoạt -> trả về thành công nhưng không lưu
+    // Honeypot bị kích hoạt -> trả về thành công nhưng không lưu/không gửi
     if (parsed.data.website) {
-      return NextResponse.json({ ok: true, message: "Đã gửi." });
+      return NextResponse.json({ ok: true, message: SUCCESS_MESSAGE });
     }
 
-    const db = await getDb();
-    await db.insert(contactMessages).values({
-      fullName: parsed.data.fullName,
-      email: parsed.data.email,
-      phone: parsed.data.phone || null,
-      subject: parsed.data.subject,
-      content: parsed.data.content,
-    });
+    const { fullName, email, phone, subject, content } = parsed.data;
 
-    return NextResponse.json({
-      ok: true,
-      message: "Cảm ơn bạn! Chúng tôi sẽ phản hồi trong vòng 24 giờ làm việc.",
-    });
+    // 1) Gửi email thật. Nếu SMTP lỗi -> KHÔNG được báo "gửi thành công".
+    try {
+      await sendContactEmail({
+        fullName,
+        email,
+        phone: phone || null,
+        subject,
+        content,
+      });
+    } catch (mailErr) {
+      console.error("[api/contact] Gửi email thất bại:", mailErr);
+      // Vẫn lưu vào DB để không mất yêu cầu của khách — có thể xử lý lại sau.
+      await saveMessage({ fullName, email, phone, subject, content }).catch(
+        (dbErr) => console.error("[api/contact] Lưu DB thất bại:", dbErr),
+      );
+      return NextResponse.json(
+        { ok: false, message: FAILURE_MESSAGE },
+        { status: 502 },
+      );
+    }
+
+    // 2) Lưu vào DB để lưu lịch sử (sau khi email đã gửi thành công).
+    await saveMessage({ fullName, email, phone, subject, content }).catch(
+      (dbErr) => console.error("[api/contact] Lưu DB thất bại:", dbErr),
+    );
+
+    return NextResponse.json({ ok: true, message: SUCCESS_MESSAGE });
   } catch (err) {
     console.error("[api/contact] Lỗi:", err);
     return NextResponse.json(
-      { ok: false, message: "Đã có lỗi xảy ra. Vui lòng thử lại sau." },
+      { ok: false, message: FAILURE_MESSAGE },
       { status: 500 },
     );
   }
+}
+
+async function saveMessage(data: {
+  fullName: string;
+  email: string;
+  phone?: string | null;
+  subject: string;
+  content: string;
+}) {
+  const db = await getDb();
+  await db.insert(contactMessages).values({
+    fullName: data.fullName,
+    email: data.email,
+    phone: data.phone || null,
+    subject: data.subject,
+    content: data.content,
+  });
 }

@@ -41,8 +41,9 @@ cp .env.example .env.local      # Windows: copy .env.example .env.local
 npm run setup
 #    hoặc chạy từng bước:
 #    npm run db:push            # tạo bảng
-#    npm run images:generate    # sinh ảnh sản phẩm/ảnh cover
-#    npm run db:seed            # nạp dữ liệu mẫu
+#    npm run images:covers      # dựng ảnh cover blog + banner danh mục
+#    npm run images:icons       # sinh apple-touch-icon + icon PWA
+#    npm run db:seed            # nạp dữ liệu mẫu (38 sản phẩm + ảnh thật)
 
 # 4) Chạy dev server
 npm run dev
@@ -70,11 +71,90 @@ Mở http://localhost:3000
 | `npm run lint` | ESLint |
 | `npm run db:push` | Tạo/cập nhật schema (PGlite hoặc Postgres) |
 | `npm run db:seed` | Nạp dữ liệu mẫu (idempotent — chạy lại được) |
+| `npm run db:reset` | Xoá sạch DB local rồi tạo lại từ đầu (dùng khi DB bị hỏng) |
 | `npm run db:check` | Kiểm tra kết nối DB (driver, số bảng, số bản ghi) |
+| `npm run db:clean-fake` | **Dọn dữ liệu ảo** (rating/số bán/lượt xem/SĐT/địa chỉ giả) khỏi DB |
+| `npm run smtp:fake` | Chạy SMTP server giả lập để test form liên hệ (không cần Gmail thật) |
 | `npm run db:generate` | Sinh migration SQL (Drizzle Kit) |
 | `npm run db:studio` | Mở Drizzle Studio để xem/sửa dữ liệu |
-| `npm run images:generate` | Sinh ảnh mẫu cho sản phẩm & bài viết |
-| `npm run setup` | `db:push` + `images:generate` + `db:seed` |
+| `npm run images:generate` | Sinh ảnh minh họa cho sản phẩm & bài viết (chỉ khi thiếu ảnh thật) |
+| `npm run images:scrape` | Quét + tải ảnh sản phẩm thật từ cellphoneS.com.vn |
+| `npm run images:covers` | Dựng ảnh cover blog (1200×630) + banner danh mục (1200×675) |
+| `npm run images:icons` | Sinh `apple-touch-icon.png`, `icon-192.png`, `icon-512.png` |
+| `npm run setup` | `db:push` + `images:generate` + `images:covers` + `images:icons` + `db:seed` |
+| `npm run verify` | Kiểm tra tự động toàn bộ: lint + route/ảnh + ảnh sản phẩm + link nội bộ + luồng chức năng |
+| `npm run verify:routes` | Crawl mọi route + file ảnh, kiểm tra HTTP 200 |
+| `npm run verify:images` | Kiểm tra mọi ảnh được tham chiếu trên mọi trang + 38 sản phẩm đủ 2 ảnh |
+| `npm run verify:links` | Quét link nội bộ & thẻ `<img>` (alt) trong HTML đã render |
+| `npm run verify:flows` | 18 luồng chức năng end-to-end (tìm kiếm, lọc, giỏ, checkout, admin…) |
+
+### 2.4. Nguyên tắc: KHÔNG bịa thông tin thương hiệu
+
+Website **không hiển thị** bất kỳ thông tin nào chưa được xác nhận là thật:
+
+| Thông tin | Cơ chế |
+|---|---|
+| Điểm đánh giá & số đánh giá | Chỉ hiện khi `products.rating_count > 0` (có dòng trong bảng `product_reviews`). Không có -> hiện *"Chưa có đánh giá"*. |
+| "Đã bán N" | Chỉ hiện khi `products.sold_count > 0` (đã có đơn hàng thật). Không có -> ẩn hoàn toàn. |
+| Lượt xem | Chỉ tính từ sự kiện `view_item` thật trong `seo_events`. |
+| Option sắp xếp "Bán chạy nhất" / "Đánh giá cao" | Ẩn nếu shop chưa có đơn hàng / đánh giá thật. |
+| Bộ lọc "Đánh giá từ ★" | Ẩn nếu chưa có đánh giá thật. |
+| Badge "Bán chạy" / "Hot" | Không seed. Admin tự tay đặt khi có căn cứ. |
+| Section "Sản phẩm bán chạy nhất" (trang chủ) | Ẩn nếu không có sản phẩm nào có `sold_count > 0`. |
+| Số điện thoại / địa chỉ showroom | **Đã gỡ khỏi toàn bộ codebase, seed và DB.** Chỉ hiện email liên hệ. |
+| Hồ sơ mạng xã hội | Không seed. Admin tự thêm trong Cài đặt → Hồ sơ mạng xã hội. |
+
+> Nếu bạn muốn bật lại các mục trên, chỉ cần nhập dữ liệu thật vào DB
+> (đơn hàng, đánh giá, hồ sơ MXH) — UI tự hiện, không cần sửa code.
+>
+> Chạy `npm run db:clean-fake` để dọn dữ liệu ảo còn sót trong DB.
+
+### 2.5. Tự phục hồi database local (PGlite)
+
+`database/db.ts` tự xử lý 3 tình huống thường gặp với PGlite local:
+
+| Tình huống | Cơ chế xử lý |
+|---|---|
+| **Data dir trống** (clone repo mới, chưa `db:push`) | Tự tạo schema + nạp dữ liệu mẫu ngay khi app khởi động |
+| **File lock/pid sót lại** sau khi bị kill | Dọn file lock cũ nếu tiến trình giữ lock đã chết |
+| **WAL hỏng** (`PANIC: could not locate a valid checkpoint` → `RuntimeError: Aborted()`) | Xoá data dir hỏng, tạo lại schema + seed lại từ `database/seed-data/*` |
+
+Ngoài ra, PGlite là DB dạng file nên **chỉ một tiến trình được mở tại một thời điểm**.
+App ghi PID chủ sở hữu vào `.pglite/.pglite.owner`; nếu bạn chạy script (`db:seed`,
+`db:push`, …) trong khi server đang chạy, sẽ nhận thông báo lỗi rõ ràng thay vì
+làm hỏng dữ liệu:
+
+```text
+Error: PGlite local (./.pglite) đang được tiến trình khác (PID 12345) sử dụng.
+Hãy dừng server đang chạy trước khi chạy script trên cùng database.
+```
+
+> 💡 Nếu vẫn muốn reset sạch: `npm run db:reset` (xoá `.pglite` + `db:push` + `db:seed`).
+>
+> 💡 Với production (PostgreSQL/Supabase) **không có giới hạn này** — mọi tính năng
+> phục hồi tự động ở trên chỉ áp dụng cho PGlite local.
+
+### 2.6. Dữ liệu demo của dashboard quản trị
+
+Dashboard mặc định lọc theo **"Tháng này" / "7 ngày gần nhất" / "Hôm nay"**.
+Vì vậy dữ liệu demo (khách hàng, đơn hàng, lưu lượng) được ghi với **mốc thời
+gian tương đối** so với lúc chạy seed — nằm trong `database/seed-data/demo.ts`:
+
+| Nhóm | Số lượng | Mốc thời gian |
+|---|---|---|
+| Khách hàng | 5 | tạo 45 ngày trước |
+| Đơn hàng (`TZ-DEMO-1001`…`1007`) | 7 | 1 → 32 ngày trước (3 đơn nằm trong "Tháng này") |
+| Sự kiện analytics (`seo_events`) | 810 | 30 ngày gần nhất, ~27 sự kiện/ngày |
+
+Nhờ vậy dashboard **luôn hiển thị số liệu thực** (doanh thu, đơn hàng, khách
+hàng, tỷ lệ chuyển đổi, biểu đồ doanh thu, top sản phẩm được xem) thay vì toàn
+số 0 — kể cả khi DB local được tự phục hồi tự động. Chạy `npm run db:seed`
+lại được nhiều lần (idempotent) và mốc thời gian luôn được tính lại.
+
+> ⚠️ **Dữ liệu demo KHÔNG được dùng để hiển thị trên website công cộng.**
+> Đơn demo có mã `TZ-DEMO-*` nên `sold_count` trên sản phẩm được tính lại
+> **loại trừ** đơn demo (xem `npm run db:clean-fake`). Nhờ vậy số "Đã bán"
+> trên website luôn khớp với đơn hàng thật.
 
 ---
 
@@ -106,9 +186,48 @@ AUTH_SECRET=
 # Tài khoản admin tạo khi seed
 ADMIN_EMAIL=admin@techzone.vn
 ADMIN_PASSWORD=Admin@12345
+
+# Email nhận yêu cầu tư vấn từ form liên hệ
+CONTACT_EMAIL=1350080137@sv.hcmunre.edu.vn
+NEXT_PUBLIC_CONTACT_EMAIL=
+
+# SMTP — BẮT BUỘC để form liên hệ gửi được email thật
+# (Gmail: bật 2FA rồi tạo App Password tại https://myaccount.google.com/apppasswords)
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=
+SMTP_PASS=
+MAIL_FROM=
 ```
 
 Website **không lỗi** khi để trống `NEXT_PUBLIC_GA_ID` / `NEXT_PUBLIC_GTM_ID` / `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` — các script tương ứng chỉ được inject khi có ID.
+
+> ⚠️ **Form liên hệ chỉ báo "gửi thành công" khi SMTP thực sự gửi được email.**
+> Nếu thiếu/sai `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` thì API trả về lỗi và
+> website hiển thị *"Không thể gửi yêu cầu lúc này. Vui lòng thử lại sau."*
+
+### 3.0.1. Test form liên hệ mà không cần Gmail thật
+
+Project có sẵn **SMTP server giả lập** để kiểm tra luồng gửi email:
+
+```bash
+# 1) Mở terminal 1 — chạy SMTP giả (nhận email vào ./.tmp-smtp/*.eml)
+npm run smtp:fake
+
+# 2) Mở terminal 2 — chạy website với cấu hình trỏ về SMTP giả
+#    Windows PowerShell:
+$env:SMTP_HOST="127.0.0.1"; $env:SMTP_PORT="2525"; $env:SMTP_SECURE="false"
+$env:SMTP_USER="test@techzone.local"; $env:SMTP_PASS="test-pass"
+$env:MAIL_FROM="TechZone <test@techzone.local>"
+$env:CONTACT_EMAIL="1350080137@sv.hcmunre.edu.vn"
+npm run dev
+
+# 3) Gửi form -> mở file .tmp-smtp/*.eml để xem nội dung email
+```
+
+Nếu API trả `200` + *"Cảm ơn bạn! Yêu cầu tư vấn đã được gửi thành công."*
+thì hệ thống email đã hoạt động đúng.
 
 ---
 
@@ -448,10 +567,13 @@ services/
   seo-service.ts        Events + analytics summary + social profiles
 database/
   schema.ts      Drizzle schema (17 bảng)
-  db.ts          Dual driver: PGlite (local) ↔ node-postgres (prod)
-  seed-data/     products, posts, keywords, catalog
+  schema-sql.ts  SQL tạo bảng (dùng chung cho migrate + auto-repair runtime)
+  db.ts          Dual driver: PGlite (local) ↔ node-postgres (prod) + tự phục hồi
+  seed-data/     products, posts, keywords, catalog, demo
 scripts/
-  migrate.ts seed.ts generate-images.ts
+  migrate.ts seed.ts reset-db.ts generate-images.ts
+  crawl-check.mjs  link-check.mjs  smoke-test.mjs   ← kiểm tra tự động
+  check-images.mjs  check-product-images.mjs       ← kiểm tra ảnh toàn site
 ```
 
 ---
@@ -597,6 +719,13 @@ npm run lint
 # Build production
 npm run build
 
+# Kiểm tra tự động toàn bộ (cần server đang chạy ở localhost:3000)
+npm run verify          # = lint + verify:routes + verify:images + verify:links + verify:flows
+npm run verify:routes   # 94 route + 102 ảnh: HTTP 200 hết
+npm run verify:images   # mọi ảnh trên mọi trang + 38 sản phẩm đủ 2 ảnh thật
+npm run verify:links    # mọi link nội bộ & ảnh trong HTML: không có link gãy
+npm run verify:flows    # 18 luồng chức năng (tìm kiếm không dấu, lọc, giỏ, checkout, admin…)
+
 # Kiểm tra nhanh các route chính
 curl -I http://localhost:3000/sitemap.xml
 curl -I http://localhost:3000/robots.txt
@@ -608,4 +737,23 @@ curl -I http://localhost:3000/san-pham/cap-sac-nhanh-20w-type-c-ho-tro-pd-30
 ## 19. Giấy phép & phụ thuộc
 
 MIT — sử dụng cho mục đích học tập.
-Ảnh sản phẩm được sinh tự động bằng `sharp` (`npm run images:generate`) nên không vi phạm bản quyền.
+
+### Ảnh sản phẩm
+
+Ảnh trong `public/products/`, `public/blog/`, `public/categories/` được lấy từ
+**cellphones.com.vn** và dựng lại về kích thước vuông 1000×1000 (JPG, nền trắng)
+bằng `sharp` — mỗi sản phẩm có đúng 2 ảnh (`{slug}.jpg` và `{slug}-2.jpg`).
+
+Tên, thương hiệu, thông số kỹ thuật và giá của mỗi sản phẩm đã được đồng bộ
+1-1 với ảnh thật tương ứng, nên không có tình trạng "ảnh một đằng, tên một nẻo".
+
+| Lệnh | Tác dụng |
+|---|---|
+| `npm run images:scrape` | Quét catalog + tải ảnh gốc từ cellphoneS vào `media/catalog/product/` |
+| `npm run images:generate` | Sinh ảnh minh họa (chỉ dùng khi thiếu ảnh thật) |
+| `npm run images:covers` | Dựng ảnh cover blog (1200×630) và banner danh mục (1200×675) |
+| `npm run images:icons` | Sinh `apple-touch-icon.png`, `icon-192.png`, `icon-512.png` |
+
+> ⚠️ Ảnh tải về từ cellphoneS thuộc bản quyền của họ. Với mục đích học tập /
+> demo nội bộ thì ổn; nếu đưa lên chạy thật thì nên thay bằng ảnh của chính
+> cửa hàng bạn hoặc dùng nguồn ảnh miễn phí (Unsplash/Pexels).

@@ -340,9 +340,9 @@ export function ProductForm({
         </h2>
         <p className="mt-1 text-xs text-ink-500">
           Nhập dạng JSON. Thông số: mảng{" "}
-          <code className="rounded bg-ink-100 px-1">[{"{"}"label":"...","value":"..."{"}"}]</code>
+          <code className="rounded bg-ink-100 px-1">[{"{"}&quot;label&quot;:&quot;...&quot;,&quot;value&quot;:&quot;...&quot;{"}"}]</code>
           . FAQ: mảng{" "}
-          <code className="rounded bg-ink-100 px-1">[{"{"}"question":"...","answer":"..."{"}"}]</code>
+          <code className="rounded bg-ink-100 px-1">[{"{"}&quot;question&quot;:&quot;...&quot;,&quot;answer&quot;:&quot;...&quot;{"}"}]</code>
           .
         </p>
         <div className="mt-4 grid gap-4 lg:grid-cols-2">

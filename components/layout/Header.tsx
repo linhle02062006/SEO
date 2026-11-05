@@ -9,7 +9,8 @@ import {
   Menu,
   X,
   ChevronDown,
-  Phone,
+  Mail,
+  MessageCircle,
   User,
   Truck,
   ShieldCheck,
@@ -102,11 +103,11 @@ export function Header({ categories }: { categories: Category[] }) {
           </p>
           <div className="flex items-center gap-5">
             <a
-              href={`tel:${SITE.phone.replace(/\s/g, "")}`}
+              href={`mailto:${SITE.email}`}
               className="flex items-center gap-1.5 transition hover:text-brand-300"
             >
-              <Phone className="size-3.5" />
-              {SITE.phone}
+              <Mail className="size-3.5" />
+              {SITE.email}
             </a>
             <span className="flex items-center gap-1.5">
               <ShieldCheck className="size-3.5" />
@@ -308,13 +309,13 @@ export function Header({ categories }: { categories: Category[] }) {
             ))}
 
             <div className="mt-4 border-t border-ink-100 px-3 pt-4">
-              <a
-                href={`tel:${SITE.phone.replace(/\s/g, "")}`}
-                className="flex items-center gap-2 text-sm font-medium text-ink-800"
+              <Link
+                href={ROUTES.contact}
+                className="flex items-center gap-2 text-sm font-medium text-ink-800 transition hover:text-brand-600"
               >
-                <Phone className="size-4 text-brand-600" />
-                {SITE.phone}
-              </a>
+                <MessageCircle className="size-4 text-brand-600" />
+                Chat tư vấn
+              </Link>
             </div>
           </nav>
         </div>

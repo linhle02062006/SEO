@@ -6,6 +6,11 @@ import { useToast } from "@/components/ui/ToastProvider";
 
 type Errors = Record<string, string>;
 
+/** Thông báo chuẩn — phải khớp chính xác với API route. */
+const SUCCESS_MESSAGE = "Cảm ơn bạn! Yêu cầu tư vấn đã được gửi thành công.";
+const FAILURE_MESSAGE =
+  "Không thể gửi yêu cầu lúc này. Vui lòng thử lại sau.";
+
 export function ContactForm() {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
@@ -31,14 +36,14 @@ export function ContactForm() {
 
       if (!res.ok || !json.ok) {
         setErrors(json.errors ?? {});
-        toast.error(json.message ?? "Gửi thất bại. Vui lòng thử lại.");
+        toast.error(json.message ?? FAILURE_MESSAGE);
       } else {
-        setSuccess(json.message ?? "Đã gửi thành công.");
-        toast.success(json.message ?? "Đã gửi thành công.");
+        setSuccess(json.message ?? SUCCESS_MESSAGE);
+        toast.success(json.message ?? SUCCESS_MESSAGE);
         form.reset();
       }
     } catch {
-      toast.error("Không thể kết nối máy chủ. Vui lòng thử lại.");
+      toast.error(FAILURE_MESSAGE);
     } finally {
       setLoading(false);
     }
@@ -66,7 +71,7 @@ export function ContactForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className="rounded-xl border border-ink-200 bg-white p-6"
+      className="relative rounded-xl border border-ink-200 bg-white p-6"
       noValidate
     >
       <h2 className="text-base font-semibold text-ink-950">Gửi tin nhắn</h2>
@@ -95,11 +100,11 @@ export function ContactForm() {
           />
         </Field>
 
-        <Field label="Số điện thoại" name="phone" error={errors.phone}>
+        <Field label="Số điện thoại (không bắt buộc)" name="phone" error={errors.phone}>
           <input
             type="tel"
             name="phone"
-            placeholder="0901234567"
+            placeholder="Nhập số điện thoại của bạn (nếu muốn)"
             className={inputCls(errors.phone)}
           />
         </Field>

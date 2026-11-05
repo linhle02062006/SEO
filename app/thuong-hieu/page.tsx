@@ -11,13 +11,15 @@ import { CtaBanner } from "@/components/common/CtaBanner";
 export const metadata: Metadata = buildMetadata({
   title: "Thương hiệu phụ kiện điện thoại chính hãng",
   description:
-    "Các thương hiệu phụ kiện điện thoại uy tín tại TechZone: Anker, Baseus, Samsung, Apple, Ugreen, Logitech, Razer. Sản phẩm chính hãng, bảo hành 12 tháng.",
+    "Các thương hiệu phụ kiện điện thoại uy tín tại TechZone: Anker, Baseus, Samsung, Ugreen, Sony, Asus, Mchose, Logitech. Sản phẩm chính hãng, bảo hành 12 tháng.",
   path: "/thuong-hieu",
   keywords: [
     "thương hiệu phụ kiện điện thoại",
     "phụ kiện chính hãng",
     "anker",
     "baseus",
+    "ugreen",
+    "mchose",
   ],
 });
 

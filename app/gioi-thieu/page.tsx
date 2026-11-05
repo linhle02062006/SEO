@@ -11,7 +11,7 @@ import {
   ShieldCheck,
   Headphones,
 } from "lucide-react";
-import { SITE, ROUTES } from "@/lib/site";
+import { ROUTES } from "@/lib/site";
 import { buildMetadata } from "@/lib/seo";
 import { breadcrumbListSchema } from "@/lib/schema";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
@@ -125,7 +125,7 @@ export default function AboutPage() {
               <p>
                 Chúng tôi tin rằng việc mua phụ kiện điện thoại không nên là
                 một trải nghiệm đầy may mắn. Một chiếc cáp sạc 20W giá 129.000
-                đồng hay một chiếc cáp "siêu nhanh" nhưng không có thông số — sự
+                đồng hay một chiếc cáp &quot;siêu nhanh&quot; nhưng không có thông số — sự
                 khác biệt đó tạo ra hậu quả hoàn toàn khác nhau cho thiết bị và
                 túi tiền của bạn.
               </p>
@@ -136,9 +136,9 @@ export default function AboutPage() {
                 hiểu rõ công nghệ trước khi quyết định.
               </p>
               <p>
-                Ngoài ra, mỗi trang sản phẩm đều có đánh giá thực tế từ khách
-                hàng, chính sách đổi trả 7 ngày rõ ràng và đường dây nóng hỗ trợ
-                hoạt động 8:00-22:00 hằng ngày.
+                Ngoài ra, mỗi trang sản phẩm đều có thông số kỹ thuật đầy đủ,
+                chính sách đổi trả 7 ngày rõ ràng và kênh tư vấn trực tuyến hoạt
+                động 8:00-22:00 hằng ngày.
               </p>
             </div>
           </div>
@@ -236,7 +236,7 @@ export default function AboutPage() {
             {
               icon: Headphones,
               title: "Hỗ trợ 8:00-22:00",
-              desc: "Tư vấn nhiệt tình qua hotline {SITE.phone}.",
+              desc: "Tư vấn nhiệt tình qua chat trực tuyến.",
             },
           ].map((w) => (
             <div

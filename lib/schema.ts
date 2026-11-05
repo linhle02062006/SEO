@@ -42,19 +42,10 @@ export function organizationSchema() {
     image: absoluteUrl("/og-default.jpg"),
     description: SITE.description,
     email: SITE.email,
-    telephone: SITE.phone,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: SITE.address.street,
-      addressLocality: SITE.address.city,
-      addressRegion: SITE.address.district,
-      addressCountry: "VN",
-    },
-    sameAs: [SITE.social.facebook, SITE.social.instagram, SITE.social.youtube],
     contactPoint: [
       {
         "@type": "ContactPoint",
-        telephone: SITE.phone,
+        email: SITE.email,
         contactType: "customer service",
         areaServed: "VN",
         availableLanguage: ["vi"],

@@ -1,14 +1,31 @@
-import { and, asc, desc, eq, gte, ilike, inArray, lte, or, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gt,
+  gte,
+  inArray,
+  lte,
+  or,
+  sql,
+} from "drizzle-orm";
 import { getDb } from "@/database/db";
 import {
   brands,
   categories,
   products,
+  productReviews,
   type Product,
   type ProductWithRelations,
 } from "@/database/schema";
 import type { Paginated, ProductFilterState } from "@/types";
-import { normalizeText } from "@/lib/slug";
+import { foldSql, tokenizeQuery } from "@/lib/vi-search";
+
+/** Escape các ký tự đặc biệt của LIKE để tránh khớp sai (%, _). */
+function escapeLike(input: string): string {
+  return input.replace(/[\\%_]/g, (m) => `\\${m}`);
+}
 
 const PRODUCT_COLUMNS = {
   id: products.id,
@@ -43,16 +60,28 @@ function buildWhere(filters: ProductFilterState) {
   const conditions = [eq(products.status, "active")];
 
   if (filters.q?.trim()) {
-    const q = normalizeText(filters.q.trim());
-    const pattern = `%${q}%`;
-    conditions.push(
-      or(
-        ilike(products.name, pattern),
-        ilike(products.shortDescription, pattern),
-        ilike(products.sku, pattern),
-        ilike(products.description, pattern),
-      )!,
-    );
+    // Tìm kiếm tiếng Việt không dấu: "sac" phải match "Sạc".
+    // Mọi token trong từ khóa đều phải xuất hiện (AND), mỗi token có thể nằm
+    // ở bất kỳ cột nào (OR).
+    const tokens = tokenizeQuery(filters.q);
+    if (tokens.length) {
+      const searchable = [
+        products.name,
+        products.shortDescription,
+        products.sku,
+        products.description,
+      ];
+      for (const token of tokens) {
+        const pattern = `%${escapeLike(token)}%`;
+        conditions.push(
+          or(
+            ...searchable.map((col) =>
+              sql`${foldSql(col)} LIKE ${pattern} ESCAPE '\'`,
+            ),
+          )!,
+        );
+      }
+    }
   }
 
   if (filters.category) {
@@ -257,6 +286,11 @@ export async function getLatestProducts(limit = 8): Promise<ProductWithRelations
   }));
 }
 
+/**
+ * Sản phẩm "bán chạy" — CHỈ trả về sản phẩm có `soldCount > 0`, tức là đã
+ * có đơn hàng THẬT. Nếu shop chưa có đơn hàng nào thì hàm trả về mảng rỗng
+ * để UI ẩn section thay vì hiển thị sản phẩm "bán chạy" không có căn cứ.
+ */
 export async function getBestSellers(limit = 8): Promise<ProductWithRelations[]> {
   const db = await getDb();
   const rows = await db
@@ -264,7 +298,7 @@ export async function getBestSellers(limit = 8): Promise<ProductWithRelations[]>
     .from(products)
     .leftJoin(categories, eq(products.categoryId, categories.id))
     .leftJoin(brands, eq(products.brandId, brands.id))
-    .where(eq(products.status, "active"))
+    .where(and(eq(products.status, "active"), gt(products.soldCount, 0)))
     .orderBy(desc(products.soldCount))
     .limit(limit);
 
@@ -307,6 +341,34 @@ export async function getAllActiveProductSlugs(): Promise<
     .select({ slug: products.slug, updatedAt: products.updatedAt })
     .from(products)
     .where(eq(products.status, "active"));
+}
+
+/**
+ * Kiểm tra shop đã có dữ liệu bán hàng THẬT chưa.
+ * Dùng để ẩn các option sắp xếp "Bán chạy nhất" khi chưa có đơn hàng nào
+ * — tránh đưa ra bảng xếp hạng vô căn cứ.
+ */
+export async function hasSalesData(): Promise<boolean> {
+  const db = await getDb();
+  const rows = await db
+    .select({ id: products.id })
+    .from(products)
+    .where(and(eq(products.status, "active"), gt(products.soldCount, 0)))
+    .limit(1);
+  return rows.length > 0;
+}
+
+/**
+ * Kiểm tra shop đã có đánh giá THẬT chưa — dùng để ẩn option sắp xếp
+ * "Đánh giá cao" và bộ lọc đánh giá khi chưa có bản ghi `product_reviews`.
+ */
+export async function hasReviewsData(): Promise<boolean> {
+  const db = await getDb();
+  const rows = await db
+    .select({ id: productReviews.id })
+    .from(productReviews)
+    .limit(1);
+  return rows.length > 0;
 }
 
 export async function getProductIdsByIds(ids: number[]): Promise<Product[]> {

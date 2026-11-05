@@ -29,3 +29,8 @@ tsconfig.tsbuildinfo
 # test artifacts
 shot-*.png
 *.tmp.ts
+
+# local scratch (scrape data, verification scripts)
+_tmp/
+# fake SMTP test inbox
+.tmp-smtp/

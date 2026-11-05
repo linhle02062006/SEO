@@ -94,8 +94,8 @@ export default async function HomePage() {
             </h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-ink-300">
               Cáp sạc nhanh, củ sạc, tai nghe Bluetooth, sạc dự phòng, kính cường
-              lực và hàng trăm phụ kiện điện thoại chính hãng. Bảo hành 12 tháng,
-              giao hàng toàn quốc 24-48h, đổi trả 7 ngày không cần lý do.
+              lực và các phụ kiện điện thoại chính hãng. Bảo hành 12 tháng, giao
+              hàng toàn quốc 24-48h, đổi trả 7 ngày không cần lý do.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -129,26 +129,28 @@ export default async function HomePage() {
           {/* Ảnh minh họa */}
           <div className="relative hidden lg:block">
             <div className="grid grid-cols-2 gap-4">
-              {bestSellers.slice(0, 4).map((p, i) => (
-                <Link
-                  key={p.id}
-                  href={`/san-pham/${p.slug}`}
-                  className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 ${
-                    i % 2 === 1 ? "translate-y-6" : ""
-                  }`}
-                >
-                  <div className="relative aspect-square">
-                    <Image
-                      src={p.imageUrl ?? "/products/placeholder.svg"}
-                      alt={p.name}
-                      fill
-                      sizes="240px"
-                      className="object-cover transition duration-500 group-hover:scale-105"
-                      priority={i < 2}
-                    />
-                  </div>
-                </Link>
-              ))}
+              {(bestSellers.length > 0 ? bestSellers : featured)
+                .slice(0, 4)
+                .map((p, i) => (
+                  <Link
+                    key={p.id}
+                    href={`/san-pham/${p.slug}`}
+                    className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 ${
+                      i % 2 === 1 ? "translate-y-6" : ""
+                    }`}
+                  >
+                    <div className="relative aspect-square">
+                      <Image
+                        src={p.imageUrl ?? "/products/placeholder.svg"}
+                        alt={p.name}
+                        fill
+                        sizes="240px"
+                        className="object-cover transition duration-500 group-hover:scale-105"
+                        priority={i < 2}
+                      />
+                    </div>
+                  </Link>
+                ))}
             </div>
           </div>
         </div>
@@ -232,7 +234,7 @@ export default async function HomePage() {
           <SectionHeading
             eyebrow="Nổi bật"
             title="Sản phẩm nổi bật"
-            description="Những mẫu phụ kiện được khách hàng quan tâm nhiều nhất tuần này."
+            description="Những mẫu phụ kiện chính hãng đang được TechZone giới thiệu."
             href={ROUTES.products}
             linkLabel="Xem tất cả"
           />
@@ -255,16 +257,18 @@ export default async function HomePage() {
       )}
 
       {/* ---------------- BÁN CHẠY ---------------- */}
-      <section className="container-x pb-12 lg:pb-16">
-        <SectionHeading
-          eyebrow="Bán chạy"
-          title="Sản phẩm bán chạy nhất"
-          description="Top sản phẩm có số lượng bán ra cao nhất tại TechZone."
-          href={`${ROUTES.products}?sort=popular`}
-          linkLabel="Xem tất cả"
-        />
-        <ProductGrid products={bestSellers} columns={4} />
-      </section>
+      {bestSellers.length > 0 && bestSellers.some((p) => p.soldCount > 0) && (
+        <section className="container-x pb-12 lg:pb-16">
+          <SectionHeading
+            eyebrow="Bán chạy"
+            title="Sản phẩm bán chạy nhất"
+            description="Top sản phẩm có số lượng bán ra cao nhất tại TechZone."
+            href={`${ROUTES.products}?sort=popular`}
+            linkLabel="Xem tất cả"
+          />
+          <ProductGrid products={bestSellers} columns={4} />
+        </section>
+      )}
 
       {/* ---------------- CTA ---------------- */}
       <CtaBanner />

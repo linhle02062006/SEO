@@ -1,12 +1,6 @@
 import Link from "next/link";
 import {
-  Facebook,
-  Instagram,
-  Youtube,
-  Music2,
-  Phone,
   Mail,
-  MapPin,
   ShieldCheck,
   Truck,
   RotateCcw,
@@ -84,25 +78,6 @@ export async function Footer() {
             sạc, củ sạc nhanh, tai nghe Bluetooth, sạc dự phòng, kính cường
             lực, ốp lưng và phụ kiện gaming.
           </p>
-          <div className="mt-5 flex items-center gap-2">
-            {[
-              { icon: Facebook, href: SITE.social.facebook, label: "Facebook" },
-              { icon: Instagram, href: SITE.social.instagram, label: "Instagram" },
-              { icon: Youtube, href: SITE.social.youtube, label: "YouTube" },
-              { icon: Music2, href: SITE.social.tiktok, label: "TikTok" },
-            ].map((s) => (
-              <a
-                key={s.label}
-                href={s.href}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                aria-label={s.label}
-                className="grid size-9 place-items-center rounded-lg bg-white/5 text-ink-300 transition hover:bg-brand-600 hover:text-white"
-              >
-                <s.icon className="size-4" />
-              </a>
-            ))}
-          </div>
         </div>
 
         <div>
@@ -144,26 +119,10 @@ export async function Footer() {
           </h2>
           <ul className="mt-4 space-y-3 text-sm">
             <li className="flex items-start gap-2.5">
-              <MapPin className="mt-0.5 size-4 shrink-0 text-brand-300" />
-              <span className="leading-6">
-                {SITE.address.street}, {SITE.address.ward},{" "}
-                {SITE.address.district}, {SITE.address.city}
-              </span>
-            </li>
-            <li className="flex items-center gap-2.5">
-              <Phone className="size-4 shrink-0 text-brand-300" />
-              <a
-                href={`tel:${SITE.phone.replace(/\s/g, "")}`}
-                className="transition hover:text-brand-300"
-              >
-                {SITE.phone}
-              </a>
-            </li>
-            <li className="flex items-center gap-2.5">
-              <Mail className="size-4 shrink-0 text-brand-300" />
+              <Mail className="mt-0.5 size-4 shrink-0 text-brand-300" />
               <a
                 href={`mailto:${SITE.email}`}
-                className="transition hover:text-brand-300"
+                className="break-all leading-6 transition hover:text-brand-300"
               >
                 {SITE.email}
               </a>
@@ -172,6 +131,10 @@ export async function Footer() {
               <CreditCard className="size-4 shrink-0 text-brand-300" />
               <span>COD &amp; Chuyển khoản ngân hàng</span>
             </li>
+            <li className="flex items-center gap-2.5">
+              <Headphones className="size-4 shrink-0 text-brand-300" />
+              <span>Tư vấn trực tuyến 8:00 - 22:00</span>
+            </li>
           </ul>
         </div>
       </div>
@@ -179,7 +142,7 @@ export async function Footer() {
       <div className="border-t border-white/10">
         <div className="container-x flex flex-col items-center justify-between gap-3 py-5 text-xs text-ink-400 sm:flex-row">
           <p>
-            © {new Date().getFullYear()} {SITE.legalName}. Đã đăng ký kinh doanh.
+            © {new Date().getFullYear()} {SITE.legalName}.
           </p>
           <p className="flex items-center gap-4">
             <Link href={ROUTES.about} className="transition hover:text-brand-300">

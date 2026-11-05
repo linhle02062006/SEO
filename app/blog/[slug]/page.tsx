@@ -7,7 +7,7 @@ import {
   Calendar,
   User,
   ArrowRight,
-  Phone,
+  MessageCircle,
   ShoppingBag,
 } from "lucide-react";
 import { SITE, ROUTES } from "@/lib/site";
@@ -175,13 +175,13 @@ export default async function BlogPostPage({
                 <ShoppingBag className="size-4" />
                 Mua ngay
               </Link>
-              <a
-                href={`tel:${SITE.phone.replace(/\s/g, "")}`}
+              <Link
+                href={`${ROUTES.contact}?topic=tu-van`}
                 className="inline-flex items-center gap-2 rounded-lg border border-white/40 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
               >
-                <Phone className="size-4" />
-                {SITE.phone}
-              </a>
+                <MessageCircle className="size-4" />
+                Chat tư vấn
+              </Link>
             </div>
           </section>
 

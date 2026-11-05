@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { buildMetadata } from "@/lib/seo";
 import { breadcrumbListSchema } from "@/lib/schema";
-import { ROUTES, SITE } from "@/lib/site";
+import { ROUTES } from "@/lib/site";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { SectionHeading } from "@/components/common/SectionHeading";
 import { FaqSection } from "@/components/common/FaqSection";
@@ -33,11 +33,11 @@ const steps = [
   {
     icon: ShoppingCart,
     title: "Bước 1 — Chọn sản phẩm",
-    desc: "Duyệt danh mục phụ kiện, lọc theo thương hiệu, giá, đánh giá hoặc tìm kiếm theo tên. Mỗi sản phẩm đều có thông số kỹ thuật, hình ảnh thật và FAQ.",
+    desc: "Duyệt danh mục phụ kiện, lọc theo thương hiệu, giá hoặc tìm kiếm theo tên. Mỗi sản phẩm đều có thông số kỹ thuật, hình ảnh thật và FAQ.",
     tips: [
       "Kiểm tra thông số công suất (W) và chuẩn sạc (PD/QC) trước khi mua",
-      "Đọc đánh giá của khách hàng để biết trải nghiệm thực tế",
-      "Sản phẩm nào có badge “Bán chạy” thường là lựa chọn an toàn",
+      "Tham khảo mô tả chi tiết và hình ảnh thực tế của sản phẩm",
+      "Sản phẩm nào có badge “Mới” hoặc “Nổi bật” thường là lựa chọn an toàn",
     ],
   },
   {
@@ -81,7 +81,7 @@ const steps = [
     title: "Bước 6 — Hỗ trợ sau bán hàng",
     desc: "Sau khi nhận hàng, bạn vẫn được hỗ trợ tra cứu đơn, đổi trả trong 7 ngày và bảo hành trong 12 tháng.",
     tips: [
-      `Hotline ${SITE.phone} hoạt động 8:00-22:00 hằng ngày`,
+      "Tư vấn trực tuyến 8:00-22:00 hằng ngày qua form liên hệ",
       "Bảo quản hóa đơn hoặc mã đơn hàng để tra cứu nhanh hơn",
     ],
   },
@@ -138,7 +138,7 @@ export default function BuyingGuidePage() {
             {
               icon: Headphones,
               title: "Hỗ trợ 8:00-22:00",
-              desc: "Hotline 1900 6868",
+              desc: "Chat tư vấn trực tuyến",
             },
           ].map((s) => (
             <div
@@ -274,7 +274,7 @@ export default function BuyingGuidePage() {
             {
               question: "Có thể thay đổi đơn hàng sau khi đặt?",
               answer:
-                "Có, nếu đơn chưa chuyển sang trạng thái đang giao. Liên hệ hotline 1900 6868 trong vòng 2 giờ sau khi đặt hàng để được hỗ trợ.",
+                "Có, nếu đơn chưa chuyển sang trạng thái đang giao. Gửi yêu cầu qua form liên hệ trong vòng 2 giờ sau khi đặt hàng để được hỗ trợ.",
             },
             {
               question: "Hóa đơn VAT được cung cấp không?",

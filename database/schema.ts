@@ -600,14 +600,18 @@ export const contactMessages = pgTable(
 /* settings (key/value) — thông tin cấu hình website & SEO             */
 /* ------------------------------------------------------------------ */
 
-export const settings = pgTable("settings", {
-  id: serial("id").primaryKey(),
-  key: varchar("key", { length: 80 }).notNull(),
-  value: text("value").notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const settings = pgTable(
+  "settings",
+  {
+    id: serial("id").primaryKey(),
+    key: varchar("key", { length: 80 }).notNull(),
+    value: text("value").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [uniqueIndex("settings_key_unique").on(t.key)],
+);
 
 /* ------------------------------------------------------------------ */
 /* relations                                                            */

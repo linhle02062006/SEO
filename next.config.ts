@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   // PGlite phải được bundle ngoài để Node đọc được file WASM/data dir
-  serverExternalPackages: ["@electric-sql/pglite", "pg"],
+  serverExternalPackages: ["@electric-sql/pglite", "pg", "nodemailer"],
   ...(usingPglite
     ? {
         experimental: {

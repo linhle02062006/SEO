@@ -153,7 +153,7 @@ export function SearchBar({
               onClick={() => submit()}
               className="w-full border-t border-ink-100 px-3 py-2.5 text-left text-xs font-medium text-brand-600 transition hover:bg-brand-50"
             >
-              Xem tất cả kết quả cho "{q}"
+              Xem tất cả kết quả cho &quot;{q}&quot;
             </button>
           </li>
         </ul>

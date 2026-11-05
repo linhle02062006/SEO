@@ -100,6 +100,12 @@ export function ProductCard({
         </h3>
 
         <div className="mt-1 flex items-center gap-2">
+          {/*
+            KHÔNG hiển thị điểm đánh giá / số lượt bán khi chưa có dữ liệu thật.
+            - `ratingCount > 0`  -> có đánh giá thật trong bảng `product_reviews`
+            - `soldCount > 0`    -> đã có đơn hàng thật
+            Nếu không có, phần này ẩn hoàn toàn thay vì điền số giả.
+          */}
           {product.ratingCount > 0 && (
             <span className="flex items-center gap-0.5 text-xs text-amber-500">
               <Star className="size-3 fill-current" />
@@ -107,10 +113,15 @@ export function ProductCard({
               <span className="text-ink-400">({product.ratingCount})</span>
             </span>
           )}
-          <span className="flex items-center gap-0.5 text-xs text-ink-400">
-            <Eye className="size-3" />
-            {product.viewCount}
-          </span>
+          {product.soldCount > 0 && (
+            <span className="flex items-center gap-0.5 text-xs text-ink-400">
+              <Eye className="size-3" />
+              Đã bán {product.soldCount}
+            </span>
+          )}
+          {product.ratingCount === 0 && product.soldCount === 0 && (
+            <span className="text-xs text-ink-400">Chưa có đánh giá</span>
+          )}
         </div>
 
         <div className="mt-auto pt-3">
