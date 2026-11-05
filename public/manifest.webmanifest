@@ -1,0 +1,50 @@
+{
+  "name": "TechZone — Phụ kiện điện thoại & công nghệ chính hãng",
+  "short_name": "TechZone",
+  "description": "Cửa hàng phụ kiện điện thoại và công nghệ chính hãng: cáp sạc, củ sạc nhanh, tai nghe Bluetooth, sạc dự phòng, kính cường lực, ốp lưng, phụ kiện laptop và phụ kiện gaming.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#1b63f5",
+  "lang": "vi-VN",
+  "categories": ["shopping", "business"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Sản phẩm",
+      "url": "/san-pham",
+      "description": "Xem tất cả phụ kiện điện thoại"
+    },
+    {
+      "name": "Giỏ hàng",
+      "url": "/gio-hang",
+      "description": "Xem giỏ hàng của bạn"
+    },
+    {
+      "name": "Tra cứu đơn hàng",
+      "url": "/dat-hang/thanh-cong",
+      "description": "Theo dõi trạng thái đơn hàng"
+    }
+  ]
+}
