@@ -118,4 +118,16 @@ export const metadataTemplate = {
     apple: [{ url: "/apple-touch-icon.png" }],
   },
   manifest: "/manifest.webmanifest",
+  /**
+   * Xác minh Google Search Console.
+   * Render tự động trong <head> dưới dạng:
+   * <meta name="google-site-verification" content="..." />
+   */
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION?.trim() || "oGrgLzZpaAfWFdA7qy895MUTQPrKNuRcRqZKjLw2SVU",
+    // Hỗ trợ thêm cho các dịch vụ khác (Bing, Yandex...)
+    ...(process.env.BING_SITE_VERIFICATION
+      ? { other: { "msvalidate.01": process.env.BING_SITE_VERIFICATION.trim() } }
+      : {}),
+  },
 };
